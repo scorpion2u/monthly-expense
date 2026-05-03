@@ -50,7 +50,7 @@
       box-shadow: 16px 16px 32px rgba(0, 0, 0, 0.12), -10px -10px 28px rgba(255, 255, 255, 0.85);
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 10px;
     }
 
     .header-card {
@@ -112,71 +112,100 @@
       justify-content: center;
     }
 
-    .btn.small {
-      padding: 6px 14px;
-      font-size: 0.75rem;
-      border-radius: 16px;
+    .summary-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .summary-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
     .summary-card {
       flex: 1;
-      padding: 12px 14px;
-      border-radius: 20px;
-      box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.08), -6px -6px 14px rgba(255, 255, 255, 0.85);
+      padding: 10px 12px;
+      border-radius: 18px;
+      box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.06), -4px -4px 10px rgba(255, 255, 255, 0.8);
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
+      min-width: 0;
     }
 
-    .summary-card.income-card {
-      background: #f0f7f0;
+    .summary-card.income-got-card {
+      background: #e8f5e9;
     }
 
-    .summary-card.expense-card {
-      background: #fef5f4;
+    .summary-card.income-pending-card {
+      background: #fff8e1;
+    }
+
+    .summary-card.expense-paid-card {
+      background: #fce4e4;
+    }
+
+    .summary-card.expense-unpaid-card {
+      background: #fbe9e7;
     }
 
     .summary-card.net-card {
-      background: #fdfaf5;
+      background: #e8eaf6;
     }
 
     .summary-label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      opacity: 0.7;
+      font-size: 0.6rem;
+      font-weight: 700;
+      opacity: 0.65;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      white-space: nowrap;
+      letter-spacing: 0.3px;
     }
 
     .summary-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
     .summary-dot.green {
-      background: #8fcf91;
+      background: #4caf50;
+    }
+
+    .summary-dot.orange {
+      background: #ff9800;
     }
 
     .summary-dot.red {
       background: #e07b7b;
     }
 
+    .summary-dot.deeppurple {
+      background: #7e57c2;
+    }
+
     .summary-dot.blue {
-      background: #7b9fc0;
+      background: #5c6bc0;
     }
 
     .summary-amount {
-      font-size: 1.15rem;
+      font-size: 0.95rem;
       font-weight: 800;
       color: #2c3e50;
+    }
+
+    .summary-count {
+      font-size: 0.55rem;
+      font-weight: 600;
+      opacity: 0.5;
+    }
+
+    .net-card .summary-amount {
+      font-size: 1.1rem;
     }
 
     .rate-box {
@@ -203,59 +232,6 @@
       font-size: 0.85rem;
       box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.08), inset -3px -3px 6px rgba(255, 255, 255, 0.7);
       font-family: inherit;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 16px;
-      border-radius: 20px;
-      background: #f2f0e9;
-      box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.06), -4px -4px 10px rgba(255, 255, 255, 0.8);
-      cursor: pointer;
-      user-select: none;
-      gap: 10px;
-    }
-
-    .header-left-section {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .header-left-section h2 {
-      font-size: 0.95rem;
-      font-weight: 650;
-      color: #4e4539;
-      white-space: nowrap;
-    }
-
-    .collapse-icon {
-      font-size: 0.7rem;
-      opacity: 0.5;
-      transition: transform 0.3s;
-      flex-shrink: 0;
-      width: 18px;
-      text-align: center;
-    }
-
-    .section-header.collapsed .collapse-icon {
-      transform: rotate(-90deg);
-    }
-
-    .list-container {
-      overflow: hidden;
-      transition: max-height 0.35s ease, opacity 0.25s;
-      max-height: 1500px;
-      opacity: 1;
-    }
-
-    .list-container.collapsed {
-      max-height: 0;
-      opacity: 0;
     }
 
     .bank-group {
@@ -346,26 +322,52 @@
       gap: 5px;
       font-size: 0.65rem;
       font-weight: 600;
+      flex-wrap: wrap;
     }
 
-    .stat-paid {
-      color: #155724;
-      background: #d4edda;
+    .stat-badge {
       padding: 2px 7px;
       border-radius: 8px;
+      white-space: nowrap;
     }
 
-    .stat-unpaid {
-      color: #721c24;
-      background: #f8d7da;
-      padding: 2px 7px;
-      border-radius: 8px;
+    .stat-inc-got {
+      color: #1b5e20;
+      background: #c8e6c9;
+    }
+
+    .stat-inc-pending {
+      color: #e65100;
+      background: #ffe0b2;
+    }
+
+    .stat-exp-paid {
+      color: #b71c1c;
+      background: #ffcdd2;
+    }
+
+    .stat-exp-unpaid {
+      color: #880e4f;
+      background: #f8bbd0;
     }
 
     .bank-header-actions {
       display: flex;
       align-items: center;
       flex-shrink: 0;
+    }
+
+    .collapse-icon {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      transition: transform 0.3s;
+      flex-shrink: 0;
+      width: 18px;
+      text-align: center;
+    }
+
+    .bank-group:not(.expanded) .collapse-icon {
+      transform: rotate(-90deg);
     }
 
     .bank-body {
@@ -426,20 +428,20 @@
       cursor: default;
     }
 
+    .transaction-item.income-item {
+      border-left: 3px solid #4caf50;
+    }
+
+    .transaction-item.expense-item {
+      border-left: 3px solid #e07b7b;
+    }
+
     .transaction-item.dragging {
       opacity: 0.5;
     }
 
     .transaction-item.drag-over {
       box-shadow: 0 0 0 2px #5b8c7e, inset 2px 2px 4px rgba(0, 0, 0, 0.04);
-    }
-
-    .transaction-item.income-item {
-      border-left: 3px solid #8fcf91;
-    }
-
-    .transaction-item.expense-item {
-      border-left: 3px solid #e07b7b;
     }
 
     .bill-handle {
@@ -462,6 +464,13 @@
       gap: 1px;
       flex: 1;
       min-width: 0;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
     }
 
     .transaction-name {
@@ -517,6 +526,94 @@
     .icon-btn:active {
       transform: scale(0.9);
       box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.6);
+    }
+
+    .icon-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .icon-dot.unpaid {
+      background: #e07b7b;
+      box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.15), inset -2px -2px 3px rgba(255, 255, 255, 0.2);
+    }
+
+    .icon-dot.paid {
+      background: #4caf50;
+      box-shadow: inset 2px 2px 3px rgba(0, 0, 0, 0.12), inset -2px -2px 3px rgba(255, 255, 255, 0.2);
+    }
+
+    .icon-edit {
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 9px solid #9a9a9a;
+      margin-left: 1px;
+    }
+
+    .icon-del {
+      width: 12px;
+      height: 12px;
+      position: relative;
+    }
+
+    .icon-del::before,
+    .icon-del::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 1.5px;
+      height: 10px;
+      background: #a0a0a0;
+      border-radius: 1px;
+    }
+
+    .icon-del::before {
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    .icon-del::after {
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.6rem;
+      font-weight: 600;
+    }
+
+    .status-badge.paid {
+      background: #c8e6c9;
+      color: #1b5e20;
+    }
+
+    .status-badge.unpaid {
+      background: #ffcdd2;
+      color: #b71c1c;
+    }
+
+    .type-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.6rem;
+      font-weight: 600;
+    }
+
+    .type-badge.income {
+      background: #c8e6c9;
+      color: #1b5e20;
+    }
+
+    .type-badge.expense {
+      background: #ffcdd2;
+      color: #b71c1c;
     }
 
     .add-transaction-btn {
@@ -672,6 +769,16 @@
       font-family: inherit;
     }
 
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23999'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+
     .row-buttons {
       display: flex;
       gap: 10px;
@@ -787,17 +894,34 @@
       </div>
     </div>
 
-    <div class="summary-row">
-      <div class="summary-card income-card">
-        <div class="summary-label"><span class="summary-dot green"></span>总收入</div>
-        <div class="summary-amount" id="totalIncomeDisplay">RM 0.00</div>
+    <!-- 四个统计卡片 + 结余 -->
+    <div class="summary-section">
+      <div class="summary-row">
+        <div class="summary-card income-got-card">
+          <div class="summary-label"><span class="summary-dot green"></span>收入·已得</div>
+          <div class="summary-amount" id="incomeGotAmount">RM 0.00</div>
+          <div class="summary-count" id="incomeGotCount">0 笔</div>
+        </div>
+        <div class="summary-card income-pending-card">
+          <div class="summary-label"><span class="summary-dot orange"></span>收入·未得</div>
+          <div class="summary-amount" id="incomePendingAmount">RM 0.00</div>
+          <div class="summary-count" id="incomePendingCount">0 笔</div>
+        </div>
       </div>
-      <div class="summary-card expense-card">
-        <div class="summary-label"><span class="summary-dot red"></span>总支出</div>
-        <div class="summary-amount" id="totalExpenseDisplay">RM 0.00</div>
+      <div class="summary-row">
+        <div class="summary-card expense-paid-card">
+          <div class="summary-label"><span class="summary-dot red"></span>支出·已缴</div>
+          <div class="summary-amount" id="expensePaidAmount">RM 0.00</div>
+          <div class="summary-count" id="expensePaidCount">0 笔</div>
+        </div>
+        <div class="summary-card expense-unpaid-card">
+          <div class="summary-label"><span class="summary-dot deeppurple"></span>支出·未缴</div>
+          <div class="summary-amount" id="expenseUnpaidAmount">RM 0.00</div>
+          <div class="summary-count" id="expenseUnpaidCount">0 笔</div>
+        </div>
       </div>
       <div class="summary-card net-card">
-        <div class="summary-label"><span class="summary-dot blue"></span>结余</div>
+        <div class="summary-label"><span class="summary-dot blue"></span>结余（总收入 − 总支出）</div>
         <div class="summary-amount" id="netBalanceDisplay">RM 0.00</div>
       </div>
     </div>
@@ -842,8 +966,12 @@
           <option value="SGD">SGD 新币</option>
         </select>
         <select id="transactionType">
-          <option value="expense">支出</option>
           <option value="income">收入</option>
+          <option value="expense" selected>支出</option>
+        </select>
+        <select id="transactionStatus">
+          <option value="unpaid">未缴/未得</option>
+          <option value="paid">已缴/已得</option>
         </select>
         <div class="row-buttons">
           <button id="transactionSaveBtn" class="btn">保存</button>
@@ -868,10 +996,12 @@
 
   <script>
     (function() {
-      const STORAGE_KEY = 'ledger_fusion_v1';
+      const STORAGE_KEY = 'ledger_fusion_v5';
       let currentRate = 3.0975;
 
-      // 数据结构: banks = [{id, name}], transactions = [{id, bankId, name, amountMYR, type:'expense'|'income', date}]
+      // 数据结构
+      // banks = [{id, name}]
+      // transactions = [{id, bankId, name, amountMYR, type:'income'|'expense', status:'paid'|'unpaid', date}]
       let data = { banks: [], transactions: [] };
       let nextBankId = 1,
         nextTransactionId = 1;
@@ -879,7 +1009,6 @@
       let editingTransactionId = null,
         editingBankId = null,
         currentBankId = null;
-      let currentTransactionType = 'expense';
 
       // 拖拽状态
       let draggedItem = null,
@@ -899,11 +1028,19 @@
 
       const listEl = document.getElementById('list');
       const toast = document.getElementById('toast');
-      const totalIncomeEl = document.getElementById('totalIncomeDisplay');
-      const totalExpenseEl = document.getElementById('totalExpenseDisplay');
-      const netBalanceEl = document.getElementById('netBalanceDisplay');
       const rateInput = document.getElementById('exchangeRateInput');
       const currentDateEl = document.getElementById('currentDate');
+
+      // 五个统计显示元素
+      const incomeGotAmountEl = document.getElementById('incomeGotAmount');
+      const incomeGotCountEl = document.getElementById('incomeGotCount');
+      const incomePendingAmountEl = document.getElementById('incomePendingAmount');
+      const incomePendingCountEl = document.getElementById('incomePendingCount');
+      const expensePaidAmountEl = document.getElementById('expensePaidAmount');
+      const expensePaidCountEl = document.getElementById('expensePaidCount');
+      const expenseUnpaidAmountEl = document.getElementById('expenseUnpaidAmount');
+      const expenseUnpaidCountEl = document.getElementById('expenseUnpaidCount');
+      const netBalanceEl = document.getElementById('netBalanceDisplay');
 
       const bankFormOverlay = document.getElementById('bankFormOverlay');
       const bankNameInput = document.getElementById('bankNameInput');
@@ -916,6 +1053,7 @@
       const transactionAmountInput = document.getElementById('transactionAmountInput');
       const transactionCurrency = document.getElementById('transactionCurrency');
       const transactionType = document.getElementById('transactionType');
+      const transactionStatusEl = document.getElementById('transactionStatus');
       const transactionSaveBtn = document.getElementById('transactionSaveBtn');
       const transactionCancelBtn = document.getElementById('transactionCancelBtn');
 
@@ -967,8 +1105,30 @@
       function loadData() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-          try { data = JSON.parse(saved); if (!data.banks) data.banks = []; if (!data.transactions) data
-            .transactions = []; } catch (e) { data = { banks: [], transactions: [] }; }
+          try {
+            data = JSON.parse(saved);
+            if (!data.banks) data.banks = [];
+            if (!data.transactions) data.transactions = [];
+          } catch (e) { data = { banks: [], transactions: [] }; }
+        } else {
+          // 尝试从旧版本迁移
+          const oldKeys = ['ledger_fusion_v4', 'ledger_fusion_v3', 'ledger_fusion_v2', 'ledger_fusion_v1'];
+          for (let k = 0; k < oldKeys.length; k++) {
+            const oldSaved = localStorage.getItem(oldKeys[k]);
+            if (oldSaved) {
+              try {
+                data = JSON.parse(oldSaved);
+                if (!data.banks) data.banks = [];
+                if (!data.transactions) data.transactions = [];
+                data.transactions.forEach(t => {
+                  if (!t.type) t.type = t.status === 'paid' ? 'income' : 'expense';
+                  if (!t.status) t.status = t.type === 'income' ? 'paid' : 'unpaid';
+                });
+                saveData();
+                break;
+              } catch (e) { data = { banks: [], transactions: [] }; }
+            }
+          }
         }
         nextBankId = 1;
         data.banks.forEach(b => { if (b.id >= nextBankId) nextBankId = b.id + 1; });
@@ -994,23 +1154,43 @@
         return data.transactions.filter(t => t.bankId === bankId);
       }
 
+      // 四个维度分别统计：收入已得、收入未得、支出已缴、支出未缴
       function getTotals() {
-        let totalInc = 0,
-          totalExp = 0;
+        let incGot = 0,
+          incPending = 0,
+          expPaid = 0,
+          expUnpaid = 0;
+        let incGotC = 0,
+          incPendingC = 0,
+          expPaidC = 0,
+          expUnpaidC = 0;
         data.transactions.forEach(t => {
           const amt = parseFloat(t.amountMYR) || 0;
-          if (t.type === 'income') totalInc += amt;
-          else totalExp += amt;
+          if (t.type === 'income' && t.status === 'paid') { incGot += amt;
+            incGotC++; } else if (t.type === 'income' && t.status === 'unpaid') { incPending += amt;
+            incPendingC++; } else if (t.type === 'expense' && t.status === 'paid') { expPaid += amt;
+            expPaidC++; } else if (t.type === 'expense' && t.status === 'unpaid') { expUnpaid += amt;
+            expUnpaidC++; }
         });
-        return { totalInc, totalExp, net: totalInc - totalExp };
+        const totalIncome = incGot + incPending;
+        const totalExpense = expPaid + expUnpaid;
+        const net = totalIncome - totalExpense;
+        return { incGot, incPending, expPaid, expUnpaid, incGotC, incPendingC, expPaidC, expUnpaidC, net, totalIncome,
+          totalExpense };
       }
 
       function updateSummary() {
-        const { totalInc, totalExp, net } = getTotals();
-        totalIncomeEl.textContent = 'RM ' + totalInc.toFixed(2);
-        totalExpenseEl.textContent = 'RM ' + totalExp.toFixed(2);
-        netBalanceEl.textContent = 'RM ' + net.toFixed(2);
-        netBalanceEl.style.color = net >= 0 ? '#2f6b44' : '#c25a3a';
+        const t = getTotals();
+        incomeGotAmountEl.textContent = 'RM ' + t.incGot.toFixed(2);
+        incomeGotCountEl.textContent = t.incGotC + ' 笔';
+        incomePendingAmountEl.textContent = 'RM ' + t.incPending.toFixed(2);
+        incomePendingCountEl.textContent = t.incPendingC + ' 笔';
+        expensePaidAmountEl.textContent = 'RM ' + t.expPaid.toFixed(2);
+        expensePaidCountEl.textContent = t.expPaidC + ' 笔';
+        expenseUnpaidAmountEl.textContent = 'RM ' + t.expUnpaid.toFixed(2);
+        expenseUnpaidCountEl.textContent = t.expUnpaidC + ' 笔';
+        netBalanceEl.textContent = 'RM ' + t.net.toFixed(2);
+        netBalanceEl.style.color = t.net >= 0 ? '#2f6b44' : '#c25a3a';
       }
 
       function deleteBank(bankId, bankName) {
@@ -1028,6 +1208,11 @@
         });
       }
 
+      function getStatusLabel(status, type) {
+        if (type === 'income') return status === 'paid' ? '已得' : '未得';
+        return status === 'paid' ? '已缴' : '未缴';
+      }
+
       function render() {
         listEl.innerHTML = '';
         if (!data.banks || data.banks.length === 0) {
@@ -1039,14 +1224,26 @@
 
         data.banks.forEach(bank => {
           const bankTransactions = getBankTransactions(bank.id);
-          let bankTotal = 0,
-            bankIncome = 0,
-            bankExpense = 0;
+          let incGot = 0,
+            incPending = 0,
+            expPaid = 0,
+            expUnpaid = 0;
+          let incGotC = 0,
+            incPendingC = 0,
+            expPaidC = 0,
+            expUnpaidC = 0;
+          let bankNet = 0;
           bankTransactions.forEach(t => {
             const amt = parseFloat(t.amountMYR) || 0;
-            bankTotal += (t.type === 'income' ? amt : -amt);
-            if (t.type === 'income') bankIncome += amt;
-            else bankExpense += amt;
+            if (t.type === 'income' && t.status === 'paid') { incGot += amt;
+              incGotC++;
+              bankNet += amt; } else if (t.type === 'income' && t.status === 'unpaid') { incPending += amt;
+              incPendingC++;
+              bankNet += amt; } else if (t.type === 'expense' && t.status === 'paid') { expPaid += amt;
+              expPaidC++;
+              bankNet -= amt; } else if (t.type === 'expense' && t.status === 'unpaid') { expUnpaid += amt;
+              expUnpaidC++;
+              bankNet -= amt; }
           });
 
           const isExpanded = expandedBanks[bank.id] !== false;
@@ -1055,26 +1252,46 @@
           el.dataset.bankId = bank.id;
           el.draggable = false;
 
-          const statusStatsHtml = bankTransactions.length > 0 ?
-            '<span class="stat-paid">+RM ' + bankIncome.toFixed(2) + '</span><span class="stat-unpaid">-RM ' +
-            bankExpense.toFixed(2) + '</span>' :
-            '<span style="font-size:0.65rem;opacity:0.4;">暂无记录</span>';
+          const hasTransactions = incGotC + incPendingC + expPaidC + expUnpaidC > 0;
+          let statusStatsHtml = '';
+          if (hasTransactions) {
+            const parts = [];
+            if (incGotC > 0) parts.push('<span class="stat-badge stat-inc-got">收已得 ' + incGotC + '</span>');
+            if (incPendingC > 0) parts.push('<span class="stat-badge stat-inc-pending">收未得 ' + incPendingC +
+              '</span>');
+            if (expPaidC > 0) parts.push('<span class="stat-badge stat-exp-paid">支已缴 ' + expPaidC + '</span>');
+            if (expUnpaidC > 0) parts.push('<span class="stat-badge stat-exp-unpaid">支未缴 ' + expUnpaidC +
+              '</span>');
+            statusStatsHtml = parts.join('');
+          } else {
+            statusStatsHtml = '<span style="font-size:0.65rem;opacity:0.4;">暂无记录</span>';
+          }
 
           let transactionsHtml = '';
           bankTransactions.forEach(t => {
             const isIncome = t.type === 'income';
+            const isPaid = t.status === 'paid';
+            const statusLabel = getStatusLabel(t.status, t.type);
             transactionsHtml += '<div class="transaction-item ' + (isIncome ? 'income-item' :
                 'expense-item') + '" data-transaction-id="' + t.id + '" draggable="false">' +
               '<span class="bill-handle">⋮⋮</span>' +
-              '<div class="transaction-info"><div class="transaction-name">' + escapeHtml(t.name) +
-              '</div><div class="transaction-meta">' + (isIncome ? '收入' : '支出') + ' · MYR</div></div>' +
+              '<div class="transaction-info">' +
+              '<div class="badge-row">' +
+              '<span class="transaction-name">' + escapeHtml(t.name) + '</span>' +
+              '<span class="type-badge ' + (isIncome ? 'income' : 'expense') + '">' + (isIncome ? '收入' : '支出') +
+              '</span>' +
+              '<span class="status-badge ' + (isPaid ? 'paid' : 'unpaid') + '">' + statusLabel + '</span>' +
+              '</div>' +
+              '<div class="transaction-meta">' + (isIncome ? '收入' : '支出') + ' · MYR</div></div>' +
               '<span class="transaction-amount ' + (isIncome ? 'income-amount' : 'expense-amount') + '">' + (
                 isIncome ? '+' : '-') + 'RM ' + parseFloat(t.amountMYR).toFixed(2) + '</span>' +
               '<div class="transaction-actions">' +
+              '<button class="icon-btn toggle-status" data-transaction-id="' + t.id +
+              '"><div class="icon-dot ' + (isPaid ? 'paid' : 'unpaid') + '"></div></button>' +
               '<button class="icon-btn edit-transaction" data-transaction-id="' + t.id +
-              '">✏️</button>' +
+              '"><div class="icon-edit"></div></button>' +
               '<button class="icon-btn del-transaction" data-transaction-id="' + t.id +
-              '">🗑️</button>' +
+              '"><div class="icon-del"></div></button>' +
               '</div></div>';
           });
 
@@ -1088,13 +1305,12 @@
 
           el.innerHTML = '<div class="bank-header"><div class="bank-header-main"><span class="bank-handle">⋮⋮</span><span class="bank-icon">📁</span>' +
             '<div class="bank-header-info"><div class="bank-name-row"><span class="bank-name">' + escapeHtml(bank
-              .name) + '</span><span class="bank-total" style="color:' + (bankTotal >= 0 ? '#2f6b44' : '#c25a3a') +
-            '">RM ' + bankTotal.toFixed(2) + '</span></div>' +
+              .name) + '</span><span class="bank-total" style="color:' + (bankNet >= 0 ? '#2f6b44' : '#c25a3a') +
+            '">RM ' + bankNet.toFixed(2) + '</span></div>' +
             '<div class="bank-status-stats">' + statusStatsHtml + '</div></div></div>' +
             '<div class="bank-header-actions"><span class="collapse-icon">▼</span></div></div>' +
             '<div class="bank-body"><div class="bank-items">' + transactionsHtml + '</div></div>';
 
-          // 事件绑定
           (function(bankId, bankName) {
             el.querySelector('.bank-header').onclick = function(e) {
               if (e.target.closest('.bank-handle')) return;
@@ -1113,9 +1329,20 @@
               transactionAmountInput.value = '';
               transactionCurrency.value = 'MYR';
               transactionType.value = 'expense';
-              currentTransactionType = 'expense';
+              transactionStatusEl.value = 'unpaid';
               openTransactionForm(bankId);
             };
+            el.querySelectorAll('.toggle-status').forEach(btn => {
+              btn.onclick = function(e) {
+                e.stopPropagation();
+                const tid = parseInt(this.dataset.transactionId);
+                const t = data.transactions.find(x => x.id === tid);
+                if (!t) return;
+                t.status = t.status === 'paid' ? 'unpaid' : 'paid';
+                saveData();
+                render();
+              };
+            });
             el.querySelectorAll('.edit-transaction').forEach(btn => {
               btn.onclick = function(e) {
                 e.stopPropagation();
@@ -1126,8 +1353,8 @@
                 transactionNameInput.value = t.name;
                 transactionAmountInput.value = t.amountMYR;
                 transactionCurrency.value = 'MYR';
-                transactionType.value = t.type;
-                currentTransactionType = t.type;
+                transactionType.value = t.type || 'expense';
+                transactionStatusEl.value = t.status || 'unpaid';
                 openTransactionForm(t.bankId);
               };
             });
@@ -1221,6 +1448,7 @@
         const amountRaw = transactionAmountInput.value;
         const currency = transactionCurrency.value;
         const type = transactionType.value;
+        const status = transactionStatusEl.value;
         if (!name) { showToast('请输入名称'); return; }
         let amount = parseFloat(amountRaw);
         if (isNaN(amount) || amount < 0) { showToast('请输入有效金额'); return; }
@@ -1242,9 +1470,11 @@
           if (t) { t.name = name;
             t.amountMYR = amountMYR;
             t.type = type;
+            t.status = status;
             t.date = finalDate; }
         } else {
-          data.transactions.push({ id: nextTransactionId, bankId: currentBankId, name, amountMYR, type, date: finalDate });
+          data.transactions.push({ id: nextTransactionId, bankId: currentBankId, name, amountMYR, type, status,
+            date: finalDate });
           nextTransactionId++;
         }
         saveData();
@@ -1257,7 +1487,7 @@
         render();
       };
 
-      // 拖拽处理
+      // ====== 拖拽处理 ======
       function handleBankDragStart(e) {
         const g = e.target.closest('.bank-group');
         if (!g || !e.target.closest('.bank-handle')) { e.preventDefault(); return; }
@@ -1510,6 +1740,10 @@
           try {
             const nd = JSON.parse(ev.target.result);
             if (!nd.banks || !nd.transactions) throw new Error('格式错误');
+            nd.transactions.forEach(t => {
+              if (!t.type) t.type = 'expense';
+              if (!t.status) t.status = 'unpaid';
+            });
             showModal('导入 ' + nd.banks.length + ' 分类 ' + nd.transactions.length + ' 条记录？', { icon: '📥',
               confirmText: '导入', confirmClass: 'confirm-safe' }).then(ok => {
               if (!ok) { importFile.value = ''; return; }
