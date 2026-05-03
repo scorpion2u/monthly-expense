@@ -894,7 +894,7 @@
       </div>
     </div>
 
-    <!-- 四个统计卡片 + 结余 -->
+    <!-- 统计区域：四个卡片 + 结余 -->
     <div class="summary-section">
       <div class="summary-row">
         <div class="summary-card income-got-card">
@@ -921,7 +921,7 @@
         </div>
       </div>
       <div class="summary-card net-card">
-        <div class="summary-label"><span class="summary-dot blue"></span>结余（总收入 − 总支出）</div>
+        <div class="summary-label"><span class="summary-dot blue"></span>结余（已得 − 已缴）</div>
         <div class="summary-amount" id="netBalanceDisplay">RM 0.00</div>
       </div>
     </div>
@@ -939,6 +939,7 @@
         <button class="btn install-menu-btn" id="installAppBtn" style="display:none;">📱 安装应用</button>
         <button class="btn" id="exportBtn">📤 导出数据</button>
         <button class="btn" id="importBtn">📥 导入数据</button>
+        <button class="btn" id="resetStatusBtn" style="color:#e67e22;">🔄 一键清零（全部标为未缴/未得）</button>
         <button class="btn confirm-danger" id="clearAllBtn">🧹 清空所有数据</button>
         <button class="btn" id="menuCloseBtn">关闭</button>
       </div>
@@ -996,7 +997,7 @@
 
   <script>
     (function() {
-      const STORAGE_KEY = 'ledger_fusion_v5';
+      const STORAGE_KEY = 'ledger_fusion_v6';
       let currentRate = 3.0975;
 
       // 数据结构
@@ -1111,8 +1112,7 @@
             if (!data.transactions) data.transactions = [];
           } catch (e) { data = { banks: [], transactions: [] }; }
         } else {
-          // 尝试从旧版本迁移
-          const oldKeys = ['ledger_fusion_v4', 'ledger_fusion_v3', 'ledger_fusion_v2', 'ledger_fusion_v1'];
+          const oldKeys = ['ledger_fusion_v5', 'ledger_fusion_v4', 'ledger_fusion_v3', 'ledger_fusion_v2', 'ledger_fusion_v1'];
           for (let k = 0; k < oldKeys.length; k++) {
             const oldSaved = localStorage.getItem(oldKeys[k]);
             if (oldSaved) {
@@ -1154,7 +1154,7 @@
         return data.transactions.filter(t => t.bankId === bankId);
       }
 
-      // 四个维度分别统计：收入已得、收入未得、支出已缴、支出未缴
+      // 统计：四个维度，结余只看已得和已缴
       function getTotals() {
         let incGot = 0,
           incPending = 0,
@@ -1172,11 +1172,9 @@
             expPaidC++; } else if (t.type === 'expense' && t.status === 'unpaid') { expUnpaid += amt;
             expUnpaidC++; }
         });
-        const totalIncome = incGot + incPending;
-        const totalExpense = expPaid + expUnpaid;
-        const net = totalIncome - totalExpense;
-        return { incGot, incPending, expPaid, expUnpaid, incGotC, incPendingC, expPaidC, expUnpaidC, net, totalIncome,
-          totalExpense };
+        // 结余 = 已得 − 已缴
+        const net = incGot - expPaid;
+        return { incGot, incPending, expPaid, expUnpaid, incGotC, incPendingC, expPaidC, expUnpaidC, net };
       }
 
       function updateSummary() {
@@ -1485,6 +1483,29 @@
         closeTransactionForm();
         showToast('已保存');
         render();
+      };
+
+      // ====== 一键清零 ======
+      document.getElementById('resetStatusBtn').onclick = () => {
+        menuOverlay.classList.remove('show');
+        const paidCount = data.transactions.filter(t => t.status === 'paid').length;
+        if (paidCount === 0) {
+          showToast('没有需要清零的记录');
+          return;
+        }
+        showModal('确定将所有 ' + paidCount + ' 条已缴/已得记录标为未缴/未得吗？', {
+          icon: '🔄',
+          confirmText: '确认清零',
+          confirmClass: 'confirm-safe'
+        }).then(ok => {
+          if (!ok) return;
+          data.transactions.forEach(t => {
+            if (t.status === 'paid') t.status = 'unpaid';
+          });
+          saveData();
+          showToast('已清零 ' + paidCount + ' 条记录');
+          render();
+        });
       };
 
       // ====== 拖拽处理 ======
