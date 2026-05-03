@@ -461,16 +461,15 @@
     .transaction-info {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 3px;
       flex: 1;
       min-width: 0;
     }
 
-    .badge-row {
+    .transaction-name-row {
       display: flex;
       align-items: center;
       gap: 4px;
-      flex-wrap: wrap;
     }
 
     .transaction-name {
@@ -479,6 +478,13 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
     }
 
     .transaction-meta {
@@ -997,12 +1003,9 @@
 
   <script>
     (function() {
-      const STORAGE_KEY = 'ledger_fusion_v6';
+      const STORAGE_KEY = 'ledger_fusion_v7';
       let currentRate = 3.0975;
 
-      // 数据结构
-      // banks = [{id, name}]
-      // transactions = [{id, bankId, name, amountMYR, type:'income'|'expense', status:'paid'|'unpaid', date}]
       let data = { banks: [], transactions: [] };
       let nextBankId = 1,
         nextTransactionId = 1;
@@ -1011,7 +1014,6 @@
         editingBankId = null,
         currentBankId = null;
 
-      // 拖拽状态
       let draggedItem = null,
         draggedItemType = null,
         draggedItemId = null,
@@ -1032,7 +1034,6 @@
       const rateInput = document.getElementById('exchangeRateInput');
       const currentDateEl = document.getElementById('currentDate');
 
-      // 五个统计显示元素
       const incomeGotAmountEl = document.getElementById('incomeGotAmount');
       const incomeGotCountEl = document.getElementById('incomeGotCount');
       const incomePendingAmountEl = document.getElementById('incomePendingAmount');
@@ -1112,7 +1113,9 @@
             if (!data.transactions) data.transactions = [];
           } catch (e) { data = { banks: [], transactions: [] }; }
         } else {
-          const oldKeys = ['ledger_fusion_v5', 'ledger_fusion_v4', 'ledger_fusion_v3', 'ledger_fusion_v2', 'ledger_fusion_v1'];
+          const oldKeys = ['ledger_fusion_v6', 'ledger_fusion_v5', 'ledger_fusion_v4', 'ledger_fusion_v3', 'ledger_fusion_v2',
+            'ledger_fusion_v1'
+          ];
           for (let k = 0; k < oldKeys.length; k++) {
             const oldSaved = localStorage.getItem(oldKeys[k]);
             if (oldSaved) {
@@ -1154,7 +1157,6 @@
         return data.transactions.filter(t => t.bankId === bankId);
       }
 
-      // 统计：四个维度，结余只看已得和已缴
       function getTotals() {
         let incGot = 0,
           incPending = 0,
@@ -1172,7 +1174,6 @@
             expPaidC++; } else if (t.type === 'expense' && t.status === 'unpaid') { expUnpaid += amt;
             expUnpaidC++; }
         });
-        // 结余 = 已得 − 已缴
         const net = incGot - expPaid;
         return { incGot, incPending, expPaid, expUnpaid, incGotC, incPendingC, expPaidC, expUnpaidC, net };
       }
@@ -1270,12 +1271,14 @@
             const isIncome = t.type === 'income';
             const isPaid = t.status === 'paid';
             const statusLabel = getStatusLabel(t.status, t.type);
-            transactionsHtml += '<div class="transaction-item ' + (isIncome ? 'income-item' :
-                'expense-item') + '" data-transaction-id="' + t.id + '" draggable="false">' +
+            // 结构：名称单独一行，徽章单独一行在下方
+            transactionsHtml += '<div class="transaction-item ' + (isIncome ? 'income-item' : 'expense-item') +
+              '" data-transaction-id="' + t.id + '" draggable="false">' +
               '<span class="bill-handle">⋮⋮</span>' +
               '<div class="transaction-info">' +
+              '<div class="transaction-name-row"><span class="transaction-name">' + escapeHtml(t.name) +
+              '</span></div>' +
               '<div class="badge-row">' +
-              '<span class="transaction-name">' + escapeHtml(t.name) + '</span>' +
               '<span class="type-badge ' + (isIncome ? 'income' : 'expense') + '">' + (isIncome ? '收入' : '支出') +
               '</span>' +
               '<span class="status-badge ' + (isPaid ? 'paid' : 'unpaid') + '">' + statusLabel + '</span>' +
@@ -1293,18 +1296,16 @@
               '</div></div>';
           });
 
-          if (bankTransactions.length === 0) transactionsHtml +=
-            '<div class="empty-hint">暂无记录</div>';
+          if (bankTransactions.length === 0) transactionsHtml += '<div class="empty-hint">暂无记录</div>';
           transactionsHtml += '<div class="bank-items-footer">' +
-            '<div class="add-transaction-btn" data-bank-id="' + bank.id +
-            '">＋ 添加记录</div>' +
-            '<button class="btn-delete-bank" data-bank-id="' + bank.id + '" data-bank-name="' + escapeHtml(bank
-              .name) + '">🗑 删除分类</button></div>';
+            '<div class="add-transaction-btn" data-bank-id="' + bank.id + '">＋ 添加记录</div>' +
+            '<button class="btn-delete-bank" data-bank-id="' + bank.id + '" data-bank-name="' + escapeHtml(bank.name) +
+            '">🗑 删除分类</button></div>';
 
           el.innerHTML = '<div class="bank-header"><div class="bank-header-main"><span class="bank-handle">⋮⋮</span><span class="bank-icon">📁</span>' +
-            '<div class="bank-header-info"><div class="bank-name-row"><span class="bank-name">' + escapeHtml(bank
-              .name) + '</span><span class="bank-total" style="color:' + (bankNet >= 0 ? '#2f6b44' : '#c25a3a') +
-            '">RM ' + bankNet.toFixed(2) + '</span></div>' +
+            '<div class="bank-header-info"><div class="bank-name-row"><span class="bank-name">' + escapeHtml(bank.name) +
+            '</span><span class="bank-total" style="color:' + (bankNet >= 0 ? '#2f6b44' : '#c25a3a') + '">RM ' + bankNet
+            .toFixed(2) + '</span></div>' +
             '<div class="bank-status-stats">' + statusStatsHtml + '</div></div></div>' +
             '<div class="bank-header-actions"><span class="collapse-icon">▼</span></div></div>' +
             '<div class="bank-body"><div class="bank-items">' + transactionsHtml + '</div></div>';
@@ -1380,7 +1381,6 @@
           listEl.appendChild(el);
         });
 
-        // 拖拽事件
         listEl.querySelectorAll('.transaction-item').forEach(item => {
           item.addEventListener('dragstart', handleTransactionDragStart);
           item.addEventListener('dragover', handleTransactionDragOver);
@@ -1485,30 +1485,22 @@
         render();
       };
 
-      // ====== 一键清零 ======
+      // 一键清零
       document.getElementById('resetStatusBtn').onclick = () => {
         menuOverlay.classList.remove('show');
         const paidCount = data.transactions.filter(t => t.status === 'paid').length;
-        if (paidCount === 0) {
-          showToast('没有需要清零的记录');
-          return;
-        }
-        showModal('确定将所有 ' + paidCount + ' 条已缴/已得记录标为未缴/未得吗？', {
-          icon: '🔄',
-          confirmText: '确认清零',
-          confirmClass: 'confirm-safe'
-        }).then(ok => {
+        if (paidCount === 0) { showToast('没有需要清零的记录'); return; }
+        showModal('确定将所有 ' + paidCount + ' 条已缴/已得记录标为未缴/未得吗？', { icon: '🔄', confirmText: '确认清零',
+          confirmClass: 'confirm-safe' }).then(ok => {
           if (!ok) return;
-          data.transactions.forEach(t => {
-            if (t.status === 'paid') t.status = 'unpaid';
-          });
+          data.transactions.forEach(t => { if (t.status === 'paid') t.status = 'unpaid'; });
           saveData();
           showToast('已清零 ' + paidCount + ' 条记录');
           render();
         });
       };
 
-      // ====== 拖拽处理 ======
+      // 拖拽
       function handleBankDragStart(e) {
         const g = e.target.closest('.bank-group');
         if (!g || !e.target.closest('.bank-handle')) { e.preventDefault(); return; }
@@ -1644,9 +1636,8 @@
           if (!touchClone) {
             touchDraggedItem.classList.add('dragging');
             touchClone = touchDraggedItem.cloneNode(true);
-            touchClone.style.cssText =
-              'position:fixed;z-index:1000;opacity:0.8;pointer-events:none;width:' + touchDraggedItem.offsetWidth +
-              'px;';
+            touchClone.style.cssText = 'position:fixed;z-index:1000;opacity:0.8;pointer-events:none;width:' + touchDraggedItem
+              .offsetWidth + 'px;';
             touchClone.style.left = touchDraggedItem.getBoundingClientRect().left + 'px';
             document.body.appendChild(touchClone);
           }
@@ -1713,7 +1704,6 @@
         }
       });
 
-      // 菜单
       menuBtn.onclick = () => menuOverlay.classList.add('show');
       menuCloseBtn.onclick = () => menuOverlay.classList.remove('show');
       menuOverlay.addEventListener('click', e => { if (e.target === menuOverlay) menuOverlay.classList.remove('show'); });
@@ -1761,10 +1751,7 @@
           try {
             const nd = JSON.parse(ev.target.result);
             if (!nd.banks || !nd.transactions) throw new Error('格式错误');
-            nd.transactions.forEach(t => {
-              if (!t.type) t.type = 'expense';
-              if (!t.status) t.status = 'unpaid';
-            });
+            nd.transactions.forEach(t => { if (!t.type) t.type = 'expense'; if (!t.status) t.status = 'unpaid'; });
             showModal('导入 ' + nd.banks.length + ' 分类 ' + nd.transactions.length + ' 条记录？', { icon: '📥',
               confirmText: '导入', confirmClass: 'confirm-safe' }).then(ok => {
               if (!ok) { importFile.value = ''; return; }
@@ -1774,8 +1761,7 @@
               nextTransactionId = 1;
               data.banks.forEach(b => { if (b.id >= nextBankId) nextBankId = b.id + 1;
                 expandedBanks[b.id] = true; });
-              data.transactions.forEach(t => { if (t.id >= nextTransactionId) nextTransactionId = t.id +
-                1; });
+              data.transactions.forEach(t => { if (t.id >= nextTransactionId) nextTransactionId = t.id + 1; });
               saveExpandedState();
               saveData();
               showToast('导入成功');
@@ -1788,16 +1774,12 @@
         r.readAsText(f);
       };
 
-      // 汇率
       rateInput.addEventListener('input', function() {
         const val = parseFloat(this.value);
-        if (!isNaN(val) && val > 0) {
-          currentRate = val;
-          showToast('汇率已更新: 1 SGD = ' + val + ' MYR');
-        }
+        if (!isNaN(val) && val > 0) { currentRate = val;
+          showToast('汇率已更新: 1 SGD = ' + val + ' MYR'); }
       });
 
-      // PWA
       var deferredPrompt;
       window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault();
         deferredPrompt = e;
