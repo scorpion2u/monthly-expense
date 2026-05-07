@@ -916,12 +916,12 @@
       </div>
       <div class="summary-row">
         <div class="summary-card expense-paid-card">
-          <div class="summary-label"><span class="summary-dot red"></span>支出·已缴</div>
+          <div class="summary-label"><span class="summary-dot red"></span>支付·已缴</div>
           <div class="summary-amount" id="expensePaidAmount">RM 0.00</div>
           <div class="summary-count" id="expensePaidCount">0 笔</div>
         </div>
         <div class="summary-card expense-unpaid-card">
-          <div class="summary-label"><span class="summary-dot deeppurple"></span>支出·未缴</div>
+          <div class="summary-label"><span class="summary-dot deeppurple"></span>支付·未缴</div>
           <div class="summary-amount" id="expenseUnpaidAmount">RM 0.00</div>
           <div class="summary-count" id="expenseUnpaidCount">0 笔</div>
         </div>
@@ -974,7 +974,7 @@
         </select>
         <select id="transactionType">
           <option value="income">收入</option>
-          <option value="expense" selected>支出</option>
+          <option value="expense" selected>支付</option>
         </select>
         <select id="transactionStatus">
           <option value="unpaid">未缴/未得</option>
@@ -1255,11 +1255,11 @@
           let statusStatsHtml = '';
           if (hasTransactions) {
             const parts = [];
-            if (incGotC > 0) parts.push('<span class="stat-badge stat-inc-got">收已得 ' + incGotC + '</span>');
-            if (incPendingC > 0) parts.push('<span class="stat-badge stat-inc-pending">收未得 ' + incPendingC +
+            if (incGotC > 0) parts.push('<span class="stat-badge stat-inc-got">收入•已得 ' + incGotC + '</span>');
+            if (incPendingC > 0) parts.push('<span class="stat-badge stat-inc-pending">收入•未得 ' + incPendingC +
               '</span>');
-            if (expPaidC > 0) parts.push('<span class="stat-badge stat-exp-paid">支已缴 ' + expPaidC + '</span>');
-            if (expUnpaidC > 0) parts.push('<span class="stat-badge stat-exp-unpaid">支未缴 ' + expUnpaidC +
+            if (expPaidC > 0) parts.push('<span class="stat-badge stat-exp-paid">支付•已缴 ' + expPaidC + '</span>');
+            if (expUnpaidC > 0) parts.push('<span class="stat-badge stat-exp-unpaid">支付•未缴 ' + expUnpaidC +
               '</span>');
             statusStatsHtml = parts.join('');
           } else {
@@ -1279,11 +1279,11 @@
               '<div class="transaction-name-row"><span class="transaction-name">' + escapeHtml(t.name) +
               '</span></div>' +
               '<div class="badge-row">' +
-              '<span class="type-badge ' + (isIncome ? 'income' : 'expense') + '">' + (isIncome ? '收入' : '支出') +
+              '<span class="type-badge ' + (isIncome ? 'income' : 'expense') + '">' + (isIncome ? '收入' : '支付') +
               '</span>' +
               '<span class="status-badge ' + (isPaid ? 'paid' : 'unpaid') + '">' + statusLabel + '</span>' +
               '</div>' +
-              '<div class="transaction-meta">' + (isIncome ? '收入' : '支出') + ' · MYR</div></div>' +
+              '<div class="transaction-meta">' + (isIncome ? '收入' : '支付') + ' · MYR</div></div>' +
               '<span class="transaction-amount ' + (isIncome ? 'income-amount' : 'expense-amount') + '">' + (
                 isIncome ? '+' : '-') + 'RM ' + parseFloat(t.amountMYR).toFixed(2) + '</span>' +
               '<div class="transaction-actions">' +
