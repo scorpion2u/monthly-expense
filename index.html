@@ -283,10 +283,10 @@
       background: rgba(0,0,0,0.08);
       backdrop-filter: blur(2px);
     }
-    .stat-income { color: #1b5e20; background: #c8e6c9; }
-    .stat-expense { color: #b71c1c; background: #ffcdd2; }
-    .stat-pending-income { color: #e65100; background: #ffe0b2; }
-    .stat-pending-expense { color: #880e4f; background: #f8bbd0; }
+    .stat-paid-income { color: #1b5e20; background: #c8e6c9; }
+    .stat-unpaid-income { color: #e65100; background: #ffe0b2; }
+    .stat-paid-expense { color: #1b5e20; background: #c8e6c9; }
+    .stat-unpaid-expense { color: #b71c1c; background: #ffcdd2; }
 
     .bank-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .collapse-icon { font-size: 0.75rem; opacity: 0.5; transition: transform 0.3s; width: 18px; text-align: center; }
@@ -407,17 +407,17 @@
     .icon-del::before { transform: translate(-50%, -50%) rotate(45deg); }
     .icon-del::after { transform: translate(-50%, -50%) rotate(-45deg); }
 
-    .status-badge, .type-badge {
+    .status-badge {
       display: inline-block;
       padding: 3px 8px;
       border-radius: 12px;
       font-size: 0.6rem;
       font-weight: 600;
     }
-    .status-badge.paid { background: #c8e6c9; color: #1b5e20; }
-    .status-badge.unpaid { background: #ffcdd2; color: #b71c1c; }
-    .type-badge.income { background: #c8e6c9; color: #1b5e20; }
-    .type-badge.expense { background: #ffcdd2; color: #b71c1c; }
+    .status-badge.paid-income { background: #c8e6c9; color: #1b5e20; }
+    .status-badge.unpaid-income { background: #ffe0b2; color: #e65100; }
+    .status-badge.paid-expense { background: #c8e6c9; color: #1b5e20; }
+    .status-badge.unpaid-expense { background: #ffcdd2; color: #b71c1c; }
 
     .add-transaction-btn {
       display: flex;
@@ -554,17 +554,17 @@
     <span class="date-badge" id="currentDate"></span>
   </div>
 
-  <!-- 统计卡片（简化版） -->
+  <!-- 统计卡片 -->
   <div class="summary-section">
     <div class="summary-row">
       <div class="summary-card income-card"><div class="summary-label"><span class="summary-dot green"></span>总收入</div><div class="summary-amount" id="totalIncome">RM 0.00</div><div class="summary-count" id="totalIncomeCount">0 笔</div></div>
       <div class="summary-card expense-card"><div class="summary-label"><span class="summary-dot red"></span>总支付</div><div class="summary-amount" id="totalExpense">RM 0.00</div><div class="summary-count" id="totalExpenseCount">0 笔</div></div>
     </div>
     <div class="summary-row">
-      <div class="summary-card pending-income-card"><div class="summary-label"><span class="summary-dot orange"></span>待收</div><div class="summary-amount" id="pendingIncome">RM 0.00</div><div class="summary-count" id="pendingIncomeCount">0 笔</div></div>
-      <div class="summary-card pending-expense-card"><div class="summary-label"><span class="summary-dot deeppurple"></span>待付</div><div class="summary-amount" id="pendingExpense">RM 0.00</div><div class="summary-count" id="pendingExpenseCount">0 笔</div></div>
+      <div class="summary-card pending-income-card"><div class="summary-label"><span class="summary-dot orange"></span>待收入</div><div class="summary-amount" id="pendingIncome">RM 0.00</div><div class="summary-count" id="pendingIncomeCount">0 笔</div></div>
+      <div class="summary-card pending-expense-card"><div class="summary-label"><span class="summary-dot deeppurple"></span>待支付</div><div class="summary-amount" id="pendingExpense">RM 0.00</div><div class="summary-count" id="pendingExpenseCount">0 笔</div></div>
     </div>
-    <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已收 − 已付）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
+    <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已收入 − 已支付）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
   </div>
 
   <!-- 汇率 -->
@@ -586,7 +586,7 @@
       <button class="btn" id="exportNotesBtn">📝 导出笔记</button>
       <button class="btn" id="exportBtn">📤 导出数据</button>
       <button class="btn" id="importBtn">📥 导入数据</button>
-      <button class="btn" id="toggleAllStatusBtn" style="color:#e67e22;">🔄 全部切换支付状态</button>
+      <button class="btn" id="toggleAllStatusBtn" style="color:#e67e22;">🔄 全部切换状态</button>
       <button class="btn confirm-danger" id="clearAllBtn">🧹 清空所有数据</button>
       <button class="btn" id="menuCloseBtn">关闭</button>
     </div>
@@ -619,7 +619,7 @@
 
 <script>
 (function() {
-  const STORAGE_KEY = 'ledger_fusion_v10';
+  const STORAGE_KEY = 'ledger_fusion_v12';
   const RATE_KEY = 'ledger_exchange_rate';
   let currentRate = 3.0975;
 
@@ -702,7 +702,7 @@
     if (savedRate && !isNaN(parseFloat(savedRate))) { currentRate = parseFloat(savedRate); rateInput.value = currentRate; } else { rateInput.value = currentRate; }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) { try { data = JSON.parse(saved); data = normalizeData(data); } catch(e) { data = { banks: [], transactions: [] }; } } else {
-      const oldKeys = ['ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
+      const oldKeys = ['ledger_fusion_v11','ledger_fusion_v10','ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
       for(let k of oldKeys) { const oldSaved = localStorage.getItem(k); if(oldSaved){ try{ data = JSON.parse(oldSaved); data = normalizeData(data); saveData(); break; } catch(e){} } }
     }
     nextBankId = 1; data.banks.forEach(b => { if(b.id >= nextBankId) nextBankId = b.id+1; });
@@ -716,21 +716,26 @@
   function getBankTransactions(bankId) { return data.transactions.filter(t => t.bankId === bankId); }
   
   function getTotals() { 
-    let totalInc=0, totalExp=0, pendingInc=0, pendingExp=0, incC=0, expC=0, pendingIncC=0, pendingExpC=0;
+    let totalInc=0, totalExp=0, pendingInc=0, pendingExp=0, paidIncC=0, unpaidIncC=0, paidExpC=0, unpaidExpC=0;
     data.transactions.forEach(t=>{ 
       const amt = parseFloat(t.amountMYR)||0; 
       if(t.type==='income'){ 
-        totalInc+=amt; incC++;
-        if(t.status==='unpaid'){ pendingInc+=amt; pendingIncC++; }
+        totalInc+=amt;
+        if(t.status==='unpaid'){ pendingInc+=amt; unpaidIncC++; } 
+        else { paidIncC++; }
       } else { 
-        totalExp+=amt; expC++;
-        if(t.status==='unpaid'){ pendingExp+=amt; pendingExpC++; }
+        totalExp+=amt;
+        if(t.status==='unpaid'){ pendingExp+=amt; unpaidExpC++; } 
+        else { paidExpC++; }
       } 
     }); 
     const paidInc = totalInc - pendingInc;
     const paidExp = totalExp - pendingExp;
     const net = paidInc - paidExp;
-    return { totalInc, totalExp, pendingInc, pendingExp, incC, expC, pendingIncC, pendingExpC, net, paidInc, paidExp };
+    // 收入总数 = 待收入笔数 + 已收入笔数
+    const incC = unpaidIncC + paidIncC;
+    const expC = unpaidExpC + paidExpC;
+    return { totalInc, totalExp, pendingInc, pendingExp, incC, expC, pendingIncC: unpaidIncC, pendingExpC: unpaidExpC, net, paidInc, paidExp, paidIncC, paidExpC };
   }
   
   function updateSummary() { 
@@ -769,7 +774,22 @@
     setTimeout(()=>bankNameInput.focus(),150); 
   }
   
-  function getStatusLabel(status) { return status==='paid'?'已支付':'未支付'; }
+  // 根据类型和状态返回显示文字
+  function getStatusLabel(type, status) { 
+    if(type === 'income') {
+      return status === 'paid' ? '已收入' : '待收入';
+    } else {
+      return status === 'paid' ? '已支付' : '待支付';
+    }
+  }
+  
+  function getStatusClass(type, status) {
+    if(type === 'income') {
+      return status === 'paid' ? 'paid-income' : 'unpaid-income';
+    } else {
+      return status === 'paid' ? 'paid-expense' : 'unpaid-expense';
+    }
+  }
 
   // 生成笔记
   function generateNotes() {
@@ -790,10 +810,9 @@
       notes += `【${bank.name}】\n`;
       const sorted = [...transactions].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
       sorted.forEach(t => {
-        const prefix = t.type === 'income' ? '➕ 收入' : '➖ 支付';
-        const statusText = t.status === 'paid' ? '✓已支付' : '○未支付';
+        const statusText = getStatusLabel(t.type, t.status);
         const currencyInfo = t.originalCurrency === 'SGD' ? ` (SGD ${t.originalAmount.toFixed(2)})` : '';
-        notes += `  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo} [${statusText}]`;
+        notes += `  ${t.date} ${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo} [${statusText}]`;
         if (t.note && t.note.trim()) notes += ` ｜备注：${t.note}`;
         notes += '\n';
       });
@@ -829,15 +848,18 @@
     
     data.banks.forEach(bank => {
       const bankTransactions = getBankTransactions(bank.id);
-      let totalInc=0, totalExp=0, pendingInc=0, pendingExp=0, incC=0, expC=0, pendingIncC=0, pendingExpC=0;
+      let totalInc=0, totalExp=0, pendingInc=0, pendingExp=0;
+      let paidIncC=0, unpaidIncC=0, paidExpC=0, unpaidExpC=0;
       bankTransactions.forEach(t=>{ 
         const amt=parseFloat(t.amountMYR)||0; 
         if(t.type==='income'){ 
-          totalInc+=amt; incC++;
-          if(t.status==='unpaid'){ pendingInc+=amt; pendingIncC++; }
+          totalInc+=amt;
+          if(t.status==='unpaid'){ pendingInc+=amt; unpaidIncC++; } 
+          else { paidIncC++; }
         } else { 
-          totalExp+=amt; expC++;
-          if(t.status==='unpaid'){ pendingExp+=amt; pendingExpC++; }
+          totalExp+=amt;
+          if(t.status==='unpaid'){ pendingExp+=amt; unpaidExpC++; } 
+          else { paidExpC++; }
         } 
       });
       const bankNet = (totalInc - pendingInc) - (totalExp - pendingExp);
@@ -847,11 +869,12 @@
       el.className = 'bank-group' + (isExpanded ? ' expanded' : '');
       el.dataset.bankId = bank.id;
       
+      // 统计显示：待收入 X、已收入 X、待支付 X、已支付 X
       let statusStatsHtml = '';
-      if(incC>0) statusStatsHtml += `<span class="stat-badge stat-income">收入 ${incC}</span>`;
-      if(expC>0) statusStatsHtml += `<span class="stat-badge stat-expense">支付 ${expC}</span>`;
-      if(pendingIncC>0) statusStatsHtml += `<span class="stat-badge stat-pending-income">待收 ${pendingIncC}</span>`;
-      if(pendingExpC>0) statusStatsHtml += `<span class="stat-badge stat-pending-expense">待付 ${pendingExpC}</span>`;
+      if(unpaidIncC > 0) statusStatsHtml += `<span class="stat-badge stat-unpaid-income">待收入 ${unpaidIncC}</span>`;
+      if(paidIncC > 0) statusStatsHtml += `<span class="stat-badge stat-paid-income">已收入 ${paidIncC}</span>`;
+      if(unpaidExpC > 0) statusStatsHtml += `<span class="stat-badge stat-unpaid-expense">待支付 ${unpaidExpC}</span>`;
+      if(paidExpC > 0) statusStatsHtml += `<span class="stat-badge stat-paid-expense">已支付 ${paidExpC}</span>`;
       if(!statusStatsHtml) statusStatsHtml = '<span style="font-size:0.65rem;opacity:0.4;">暂无记录</span>';
       
       let transactionsHtml = '';
@@ -859,7 +882,9 @@
         const isIncome=t.type==='income'; 
         const isPaid=t.status==='paid'; 
         const currencyDisplay = t.originalCurrency==='SGD' ? `SGD ${t.originalAmount.toFixed(2)} → ` : ''; 
-        transactionsHtml += `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name-row"><span class="transaction-name">${escapeHtml(t.name)}</span></div><div class="badge-row"><span class="type-badge ${isIncome?'income':'expense'}">${isIncome?'收入':'支付'}</span><span class="status-badge ${isPaid?'paid':'unpaid'}">${getStatusLabel(t.status)}</span></div><div class="transaction-meta">${currencyDisplay}MYR ${parseFloat(t.amountMYR).toFixed(2)}</div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; 
+        const statusLabel = getStatusLabel(t.type, t.status);
+        const statusClass = getStatusClass(t.type, t.status);
+        transactionsHtml += `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name-row"><span class="transaction-name">${escapeHtml(t.name)}</span></div><div class="badge-row"><span class="status-badge ${statusClass}">${statusLabel}</span></div><div class="transaction-meta">${currencyDisplay}MYR ${parseFloat(t.amountMYR).toFixed(2)}</div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; 
       });
       if(bankTransactions.length===0) transactionsHtml += '<div class="empty-hint">暂无记录</div>';
       transactionsHtml += `<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">🗑 删除分类</button></div>`;
@@ -1050,7 +1075,7 @@
     render(); 
   };
 
-  // 拖拽函数
+  // 拖拽函数（保持不变）
   function handleBankDragStart(e){ 
     const g=e.target.closest('.bank-group'); 
     if(!g||!e.target.closest('.bank-handle')){ e.preventDefault(); return; } 
