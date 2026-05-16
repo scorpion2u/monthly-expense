@@ -213,6 +213,17 @@
       font-family: inherit;
     }
 
+    .rate-edit-icon {
+      font-size: 0.9rem;
+      opacity: 0.5;
+      margin-left: 4px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .rate-edit-icon:hover {
+      opacity: 0.8;
+    }
+
     .bank-group {
       border-radius: 24px;
       background: #d4d4d4;
@@ -541,6 +552,25 @@
       font-family: 'Courier New', monospace;
       box-shadow: inset 2px 2px 6px rgba(0,0,0,0.1);
     }
+
+    .danger-input {
+      margin-top: 8px;
+      text-align: center;
+    }
+    .danger-input input {
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      padding: 10px;
+      background: #fff0f0;
+      border: 1px solid #e07b7b;
+    }
+    .danger-warning {
+      color: #c0392b;
+      font-size: 0.75rem;
+      text-align: center;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -567,8 +597,13 @@
     <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已收入 − 已支付）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
   </div>
 
-  <!-- 汇率 -->
-  <div class="rate-box"><span>🇸🇬 1 SGD = </span><input type="number" id="exchangeRateInput" step="0.0001" min="0.1" value="3.0975"><span> MYR</span></div>
+  <!-- 汇率 - 铅笔可点击聚焦输入框 -->
+  <div class="rate-box">
+    <span>🇸🇬 1 SGD = </span>
+    <input type="number" id="exchangeRateInput" step="0.0001" min="0.1" value="3.0975">
+    <span> MYR</span>
+    <span class="rate-edit-icon" id="rateEditIcon">✏️</span>
+  </div>
 
   <!-- 分类列表容器 -->
   <div id="list" class="list"></div>
@@ -586,7 +621,7 @@
       <button class="btn" id="exportNotesBtn">📝 导出笔记</button>
       <button class="btn" id="exportBtn">📤 导出数据</button>
       <button class="btn" id="importBtn">📥 导入数据</button>
-      <button class="btn confirm-danger" id="clearAllBtn">🧹 清空所有数据</button>
+      <button class="btn confirm-danger" id="clearAllBtn">⚠️ 清空所有数据</button>
       <button class="btn" id="toggleAllStatusBtn" style="color:#e67e22;">🔄 全部切换到未收入与未支付状态</button>
       <button class="btn" id="menuCloseBtn">关闭</button>
     </div>
@@ -609,6 +644,22 @@
       <div class="modal-title">📝 导出笔记</div>
       <div class="export-preview" id="notesPreview">正在生成笔记...</div>
       <div class="form-buttons"><button class="btn confirm-safe" id="copyNotesBtn">📋 复制笔记</button><button class="btn" id="downloadNotesBtn">💾 下载笔记</button><button class="btn" id="closeNotesBtn">关闭</button></div>
+    </div>
+  </div>
+
+  <!-- 安全清空确认弹窗 -->
+  <div class="modal-overlay" id="clearConfirmOverlay">
+    <div class="modal-box" style="max-width: 360px;">
+      <div class="modal-title">⚠️ 危险操作</div>
+      <div class="modal-message">清空后将删除所有分类和记录，且无法恢复！</div>
+      <div class="danger-input">
+        <input type="text" id="clearConfirmInput" placeholder='输入"确认清空"以继续' autocomplete="off">
+      </div>
+      <div class="danger-warning">⚠️ 此操作不可撤销</div>
+      <div class="modal-buttons">
+        <button class="btn cancel-btn" id="clearConfirmCancel">取消</button>
+        <button class="btn confirm-danger" id="clearConfirmOk" disabled>确认清空</button>
+      </div>
     </div>
   </div>
 
@@ -638,6 +689,7 @@
   const toast = document.getElementById('toast');
   const rateInput = document.getElementById('exchangeRateInput');
   const currentDateEl = document.getElementById('currentDate');
+  const rateEditIcon = document.getElementById('rateEditIcon');
 
   const totalIncomeEl = document.getElementById('totalIncome');
   const totalIncomeCountEl = document.getElementById('totalIncomeCount');
@@ -671,6 +723,11 @@
   const modalCancel = document.getElementById('modalCancel');
   const modalConfirm = document.getElementById('modalConfirm');
 
+  const clearConfirmOverlay = document.getElementById('clearConfirmOverlay');
+  const clearConfirmInput = document.getElementById('clearConfirmInput');
+  const clearConfirmCancel = document.getElementById('clearConfirmCancel');
+  const clearConfirmOk = document.getElementById('clearConfirmOk');
+
   const menuOverlay = document.getElementById('menuOverlay');
   const menuBtn = document.getElementById('menuBtn');
   const menuCloseBtn = document.getElementById('menuCloseBtn');
@@ -693,6 +750,41 @@
   modalConfirm.onclick = () => hideModal(true);
   modalCancel.onclick = () => hideModal(false);
   modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) hideModal(false); });
+
+  function openClearConfirm() {
+    clearConfirmInput.value = '';
+    clearConfirmOk.disabled = true;
+    clearConfirmOverlay.classList.add('show');
+    setTimeout(() => clearConfirmInput.focus(), 100);
+  }
+  function closeClearConfirm() {
+    clearConfirmOverlay.classList.remove('show');
+  }
+  clearConfirmCancel.onclick = closeClearConfirm;
+  clearConfirmInput.oninput = function() {
+    clearConfirmOk.disabled = this.value !== '确认清空';
+  };
+  clearConfirmOk.onclick = function() {
+    if (clearConfirmInput.value === '确认清空') {
+      data = { banks: [], transactions: [] };
+      expandedBanks = {};
+      nextBankId = 1;
+      nextTransactionId = 1;
+      saveExpandedState();
+      saveData();
+      showToast('已清空所有数据');
+      closeClearConfirm();
+      render();
+    } else {
+      showToast('输入"确认清空"才能继续');
+    }
+  };
+  clearConfirmOverlay.addEventListener('click', e => { if (e.target === clearConfirmOverlay) closeClearConfirm(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && clearConfirmOverlay.classList.contains('show')) {
+      closeClearConfirm();
+    }
+  });
 
   function escapeHtml(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
   function normalizeData(d) { if (!d.banks) d.banks = []; if (!d.transactions) d.transactions = []; d.transactions.forEach(t => { if (!t.type) t.type = 'expense'; if (!t.status) t.status = 'unpaid'; if (!t.originalCurrency) { t.originalCurrency = 'MYR'; t.originalAmount = t.amountMYR; } if (t.originalAmount === undefined) t.originalAmount = t.amountMYR; }); return d; }
@@ -732,7 +824,6 @@
     const paidInc = totalInc - pendingInc;
     const paidExp = totalExp - pendingExp;
     const net = paidInc - paidExp;
-    // 收入总数 = 待收入笔数 + 已收入笔数
     const incC = unpaidIncC + paidIncC;
     const expC = unpaidExpC + paidExpC;
     return { totalInc, totalExp, pendingInc, pendingExp, incC, expC, pendingIncC: unpaidIncC, pendingExpC: unpaidExpC, net, paidInc, paidExp, paidIncC, paidExpC };
@@ -774,7 +865,6 @@
     setTimeout(()=>bankNameInput.focus(),150); 
   }
   
-  // 根据类型和状态返回显示文字
   function getStatusLabel(type, status) { 
     if(type === 'income') {
       return status === 'paid' ? '已收入' : '待收入';
@@ -791,7 +881,6 @@
     }
   }
 
-  // 生成笔记
   function generateNotes() {
     let notes = '📒 每月帐目 · 记账笔记\n';
     notes += `📅 生成时间：${new Date().toLocaleDateString('zh-CN')}\n`;
@@ -837,7 +926,6 @@
   closeNotesBtn.addEventListener('click', closeExportNotes);
   exportNotesOverlay.addEventListener('click', e=>{ if(e.target===exportNotesOverlay) closeExportNotes(); });
 
-  // 渲染主列表
   function render() {
     listEl.innerHTML = '';
     if(!data.banks || data.banks.length===0){ 
@@ -869,7 +957,6 @@
       el.className = 'bank-group' + (isExpanded ? ' expanded' : '');
       el.dataset.bankId = bank.id;
       
-      // 统计显示：待收入 X、已收入 X、待支付 X、已支付 X
       let statusStatsHtml = '';
       if(unpaidIncC > 0) statusStatsHtml += `<span class="stat-badge stat-unpaid-income">待收入 ${unpaidIncC}</span>`;
       if(paidIncC > 0) statusStatsHtml += `<span class="stat-badge stat-paid-income">已收入 ${paidIncC}</span>`;
@@ -895,7 +982,6 @@
       listEl.appendChild(el);
     });
     
-    // 事件委托
     listEl.querySelectorAll('.toggle-status').forEach(btn=>{ 
       btn.onclick=(e)=>{ 
         e.stopPropagation(); 
@@ -971,7 +1057,6 @@
       }; 
     });
     
-    // 拖拽绑定
     listEl.querySelectorAll('.transaction-item').forEach(item=>{ 
       item.setAttribute('draggable','true'); 
       item.addEventListener('dragstart',handleTransactionDragStart); 
@@ -1075,7 +1160,6 @@
     render(); 
   };
 
-  // 拖拽函数（保持不变）
   function handleBankDragStart(e){ 
     const g=e.target.closest('.bank-group'); 
     if(!g||!e.target.closest('.bank-handle')){ e.preventDefault(); return; } 
@@ -1291,6 +1375,12 @@
   document.addEventListener('touchend',handleTouchEnd);
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ if(modalOverlay.classList.contains('show')) hideModal(false); else if(transactionFormOverlay.classList.contains('show')) closeTransactionForm(); else if(bankFormOverlay.classList.contains('show')) closeBankForm(); else if(menuOverlay.classList.contains('show')) menuOverlay.classList.remove('show'); else if(exportNotesOverlay.classList.contains('show')) closeExportNotes(); } });
 
+  // 点击铅笔聚焦到汇率输入框
+  rateEditIcon.addEventListener('click', function() {
+    rateInput.focus();
+    rateInput.select();
+  });
+
   menuBtn.onclick = () => menuOverlay.classList.add('show');
   menuCloseBtn.onclick = () => menuOverlay.classList.remove('show');
   menuOverlay.addEventListener('click', e => { if(e.target === menuOverlay) menuOverlay.classList.remove('show'); });
@@ -1312,7 +1402,14 @@
       } 
     }); 
   };
-  document.getElementById('clearAllBtn').onclick = () => { menuOverlay.classList.remove('show'); showModal('确定清空所有数据吗？',{icon:'⚠️',confirmText:'清空',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data={banks:[],transactions:[]}; expandedBanks={}; nextBankId=1; nextTransactionId=1; saveExpandedState(); saveData(); showToast('已清空'); render(); } }); };
+  document.getElementById('clearAllBtn').onclick = () => { 
+    menuOverlay.classList.remove('show');
+    if (data.banks.length === 0 && data.transactions.length === 0) {
+      showToast('当前没有数据可清空');
+      return;
+    }
+    openClearConfirm();
+  };
   document.getElementById('addBankBtn').onclick = () => openBankForm();
   exportNotesBtn.onclick = openExportNotes;
 
