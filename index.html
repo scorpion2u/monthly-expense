@@ -907,6 +907,7 @@
     }
   }
 
+  // 导出笔记 - 不显示状态
   function generateNotes() {
     let notes = '📒 帐目记录 · 记账笔记\n';
     notes += `📅 生成时间：${new Date().toLocaleDateString('zh-CN')}\n`;
@@ -925,9 +926,9 @@
       notes += `【${bank.name}】\n`;
       const sorted = [...transactions].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
       sorted.forEach(t => {
-        const statusText = getStatusLabel(t.type, t.status);
+        const prefix = t.type === 'income' ? '➕ 收入' : '➖ 支付';
         const currencyInfo = t.originalCurrency === 'SGD' ? ` (SGD ${t.originalAmount.toFixed(2)})` : '';
-        notes += `  ${t.date} ${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo} [${statusText}]`;
+        notes += `  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo}`;
         if (t.note && t.note.trim()) notes += ` ｜备注：${t.note}`;
         notes += '\n';
       });
