@@ -4,11 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover, shrink-to-fit=yes">
   <title>帐目记录</title>
-  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIui4uOebruW6j+W9vSIsCiAgInNob3J0X25hbWUiOiAi6LSm55uuIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZDRkNGQ0IiwKICAidGhlbWVfY29sb3IiOiAiIzc3Nzc3NyIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vc2NvcnBpb24ydS5naXRodWIuaW8vbW9udGhseS1leHBlbnNlL2ljb24tMTkyLnBuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3Njb3JwaW9uMnUuZ2l0aHViLmlvL21vbnRobHktZXhwZW5zZS9pY29uLTUxMi5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL25nIgogICAgfQogIF0KfQ==">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#d4d4d4">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="帐目记录">
+  <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="application-name" content="帐目记录">
+<meta name="msapplication-TileColor" content="#d4d4d4">
   <link rel="apple-touch-icon" href="https://scorpion2u.github.io/monthly-expense/icon-192.png">
   <style>
     /* ========== RESET & BASE ========== */
@@ -22,7 +27,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      min-height: 100vh;
+      min-height: 100dvh;
       padding: 16px;
       margin: 0;
     }
@@ -120,6 +125,7 @@
       width: 85px; background: #e2e2e2; border: none; border-radius: 18px;
       padding: 8px 12px; font-weight: 700; text-align: center;
       box-shadow: inset 3px 3px 6px rgba(0,0,0,0.08), inset -2px -2px 5px rgba(255,255,255,0.6);
+      font-size: 16px;
     }
     .rate-edit-icon { font-size: 0.9rem; opacity: 0.5; margin-left: 4px; cursor: pointer; }
 
@@ -241,11 +247,11 @@
     .modal-message { font-weight: 600; font-size: 0.9rem; text-align: center; }
     .modal-buttons, .form-buttons { display: flex; gap: 12px; }
     .modal-buttons .btn, .form-buttons .btn { flex: 1; padding: 12px; }
-    input, select {
+    input, select, textarea {
       border: none; padding: 12px 14px; border-radius: 18px;
       background: #e2e2e2;
       box-shadow: inset 3px 3px 6px rgba(0,0,0,0.08), inset -2px -2px 4px rgba(255,255,255,0.5);
-      font-size: 0.85rem;
+      font-size: 16px;
     }
     select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23777'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 32px; }
     .row-buttons { display: flex; gap: 10px; }
@@ -979,30 +985,59 @@
   function initEventListeners() {
     // 汇率相关
     rateEditIcon.addEventListener('click', () => { rateInput.focus(); rateInput.select(); });
-    rateInput.addEventListener('input', function() {
-      const val = parseFloat(this.value);
-      if (!isNaN(val) && val > 0 && val !== currentRate) {
-        currentRate = val;
-        saveRate();
-        let recalcCount = 0;
-        data.transactions.forEach(t => {
-          if (t.originalCurrency === 'SGD') {
-            const newAmt = t.originalAmount * currentRate;
-            if (Math.abs(t.amountMYR - newAmt) > 0.001) {
-              t.amountMYR = newAmt;
-              recalcCount++;
-            }
-          }
-        });
-        if (recalcCount > 0) {
-          saveData();
-          render();
-          showToast(`汇率已更新，已重新换算 ${recalcCount} 条 SGD 记录`);
-        } else {
-          showToast('汇率已保存');
-        }
+    function applyExchangeRate() {
+  const val = parseFloat(rateInput.value);
+
+  if (isNaN(val) || val <= 0) {
+    showToast('请输入有效汇率');
+    rateInput.value = currentRate;
+    return;
+  }
+
+  if (Math.abs(val - currentRate) < 0.0001) return;
+
+  currentRate = val;
+
+  saveRate();
+
+  let recalcCount = 0;
+
+  data.transactions.forEach(t => {
+    if (t.originalCurrency === 'SGD') {
+      const newAmt = t.originalAmount * currentRate;
+
+      if (Math.abs(t.amountMYR - newAmt) > 0.001) {
+        t.amountMYR = newAmt;
+        recalcCount++;
       }
-    });
+    }
+  });
+
+  if (recalcCount > 0) {
+    saveData();
+    render();
+    showToast(`汇率已更新，已重新换算 ${recalcCount} 条 SGD 记录`);
+  } else {
+    showToast('汇率已保存');
+  }
+}
+
+// Enter
+rateInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+
+    applyExchangeRate();
+
+    rateInput.blur();
+  }
+});
+
+// 失去焦点
+rateInput.addEventListener('blur', applyExchangeRate);
+
+// change 兼容 iOS
+rateInput.addEventListener('change', applyExchangeRate);
 
     // 菜单
     menuBtn.onclick = () => menuOverlay.classList.add('show');
@@ -1267,6 +1302,85 @@
   initEventListeners();
   render();
 })();
+</script>
+<script>
+// ==================== PWA + iOS 支持 ====================
+
+// 注册 Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => {
+        console.log('SW registered');
+      })
+      .catch(err => {
+        console.log('SW failed', err);
+      });
+  });
+}
+
+// iOS 检测
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+// 是否 standalone
+function isInStandaloneMode() {
+  return ('standalone' in window.navigator) && window.navigator.standalone;
+}
+
+// iOS 安装提示
+window.addEventListener('load', () => {
+  if (isIOS() && !isInStandaloneMode()) {
+    setTimeout(() => {
+      const iosTip = document.createElement('div');
+      iosTip.innerHTML = `
+        <div style="
+          position:fixed;
+          left:50%;
+          bottom:20px;
+          transform:translateX(-50%);
+          width:90%;
+          max-width:420px;
+          background:#f0f0f0;
+          color:#333;
+          padding:16px;
+          border-radius:20px;
+          z-index:99999;
+          box-shadow:0 10px 30px rgba(0,0,0,0.2);
+          font-size:14px;
+          line-height:1.6;
+          text-align:center;
+        ">
+          <div style="font-size:16px;font-weight:700;margin-bottom:8px;">
+            📱 安装到 iPhone
+          </div>
+          <div>
+            点击 Safari 的
+            <b>分享按钮</b>
+            <br>
+            然后选择
+            <b>「添加到主屏幕」</b>
+          </div>
+          <button id="closeIosTip" style="
+            margin-top:12px;
+            border:none;
+            background:#ddd;
+            padding:8px 18px;
+            border-radius:12px;
+            cursor:pointer;
+          ">知道了</button>
+        </div>
+      `;
+
+      document.body.appendChild(iosTip);
+
+      document.getElementById('closeIosTip').onclick = () => {
+        iosTip.remove();
+      };
+    }, 1500);
+  }
+});
 </script>
 </body>
 </html>
