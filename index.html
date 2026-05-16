@@ -670,7 +670,7 @@
 
 <script>
 (function() {
-  const STORAGE_KEY = 'ledger_fusion_v12';
+  const STORAGE_KEY = 'ledger_fusion_v13';
   const RATE_KEY = 'ledger_exchange_rate';
   let currentRate = 3.0975;
 
@@ -794,7 +794,7 @@
     if (savedRate && !isNaN(parseFloat(savedRate))) { currentRate = parseFloat(savedRate); rateInput.value = currentRate; } else { rateInput.value = currentRate; }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) { try { data = JSON.parse(saved); data = normalizeData(data); } catch(e) { data = { banks: [], transactions: [] }; } } else {
-      const oldKeys = ['ledger_fusion_v11','ledger_fusion_v10','ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
+      const oldKeys = ['ledger_fusion_v12','ledger_fusion_v11','ledger_fusion_v10','ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
       for(let k of oldKeys) { const oldSaved = localStorage.getItem(k); if(oldSaved){ try{ data = JSON.parse(oldSaved); data = normalizeData(data); saveData(); break; } catch(e){} } }
     }
     nextBankId = 1; data.banks.forEach(b => { if(b.id >= nextBankId) nextBankId = b.id+1; });
@@ -1381,6 +1381,66 @@
     rateInput.select();
   });
 
+  // 汇率变化时，自动重新换算所有 SGD 记录
+  rateInput.addEventListener('input', function() {
+    const val = parseFloat(this.value);
+    if (!isNaN(val) && val > 0 && val !== currentRate) {
+      currentRate = val;
+      saveRate();
+      
+      let recalcCount = 0;
+      data.transactions.forEach(t => {
+        if (t.originalCurrency === 'SGD') {
+          const newAmountMYR = t.originalAmount * currentRate;
+          if (Math.abs(t.amountMYR - newAmountMYR) > 0.001) {
+            t.amountMYR = newAmountMYR;
+            recalcCount++;
+          }
+        }
+      });
+      
+      if (recalcCount > 0) {
+        saveData();
+        render();
+        showToast(`汇率已更新，已重新换算 ${recalcCount} 条 SGD 记录`);
+      } else {
+        showToast('汇率已保存');
+      }
+    }
+  });
+
+  // 按回车键也触发汇率更新
+  rateInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.blur();
+      const val = parseFloat(this.value);
+      if (!isNaN(val) && val > 0 && val !== currentRate) {
+        currentRate = val;
+        saveRate();
+        
+        let recalcCount = 0;
+        data.transactions.forEach(t => {
+          if (t.originalCurrency === 'SGD') {
+            const newAmountMYR = t.originalAmount * currentRate;
+            if (Math.abs(t.amountMYR - newAmountMYR) > 0.001) {
+              t.amountMYR = newAmountMYR;
+              recalcCount++;
+            }
+          }
+        });
+        
+        if (recalcCount > 0) {
+          saveData();
+          render();
+          showToast(`汇率已更新，已重新换算 ${recalcCount} 条 SGD 记录`);
+        } else {
+          showToast('汇率已保存');
+        }
+      }
+    }
+  });
+
   menuBtn.onclick = () => menuOverlay.classList.add('show');
   menuCloseBtn.onclick = () => menuOverlay.classList.remove('show');
   menuOverlay.addEventListener('click', e => { if(e.target === menuOverlay) menuOverlay.classList.remove('show'); });
@@ -1414,8 +1474,6 @@
   exportNotesBtn.onclick = openExportNotes;
 
   importFile.onchange = function(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=function(ev){ try{ let nd=JSON.parse(ev.target.result); if(!nd.banks||!nd.transactions) throw new Error('格式错误'); nd=normalizeData(nd); showModal('导入 '+nd.banks.length+' 分类 '+nd.transactions.length+' 条记录？',{icon:'📥',confirmText:'导入',confirmClass:'confirm-safe'}).then(ok=>{ if(!ok){ importFile.value=''; return; } data=nd; expandedBanks={}; nextBankId=1; nextTransactionId=1; data.banks.forEach(b=>{ if(b.id>=nextBankId) nextBankId=b.id+1; expandedBanks[b.id]=true; }); data.transactions.forEach(t=>{ if(t.id>=nextTransactionId) nextTransactionId=t.id+1; }); saveExpandedState(); saveData(); showToast('导入成功'); importFile.value=''; render(); }); }catch(err){ showToast('导入失败'); importFile.value=''; } }; r.readAsText(f); };
-
-  rateInput.addEventListener('input',function(){ const val=parseFloat(this.value); if(!isNaN(val)&&val>0){ currentRate=val; saveRate(); showToast('汇率已更新'); } });
 
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferredPrompt=e; installBtn.style.display='flex'; });
