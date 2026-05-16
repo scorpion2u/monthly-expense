@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover, shrink-to-fit=yes">
-  <title>每月帐目</title>
+  <title>帐目记录</title>
 
-  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIuavj+aciOi4uOebriIsCiAgInNob3J0X25hbWUiOiAi6LSm55uuIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZDRkNGQ0IiwKICAidGhlbWVfY29sb3IiOiAiIzc3Nzc3NyIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vc2NvcnBpb24ydS5naXRodWIuaW8vbW9udGhseS1leHBlbnNlL2ljb24tMTkyLnBuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3Njb3JwaW9uMnUuZ2l0aHViLmlvL21vbnRobHktZXhwZW5zZS9pY29uLTUxMi5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIui4uOebruW6j+W9vSIsCiAgInNob3J0X25hbWUiOiAi6LSm55uuIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZDRkNGQ0IiwKICAidGhlbWVfY29sb3IiOiAiIzc3Nzc3NyIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vc2NvcnBpb24ydS5naXRodWIuaW8vbW9udGhseS1leHBlbnNlL2ljb24tMTkyLnBuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3Njb3JwaW9uMnUuZ2l0aHViLmlvL21vbnRobHktZXhwZW5zZS9pY29uLTUxMi5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
 
   <meta name="theme-color" content="#d4d4d4">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="每月帐目">
+  <meta name="apple-mobile-web-app-title" content="帐目记录">
   <link rel="apple-touch-icon" href="https://scorpion2u.github.io/monthly-expense/icon-192.png">
 
   <style>
@@ -81,6 +81,35 @@
       font-weight: 700;
       font-size: 1.3rem;
       color: #3a3a3a;
+    }
+
+    .title-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      background: #d4d4d4;
+      background: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%);
+      box-shadow: 3px 3px 6px rgba(0,0,0,0.1), -2px -2px 4px rgba(255,255,255,0.6);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #3a3a3a;
+    }
+
+    .header-btn:active {
+      transform: scale(0.94);
+      box-shadow: inset 3px 3px 6px rgba(0,0,0,0.15), inset -2px -2px 4px rgba(255,255,255,0.5);
+      background: linear-gradient(180deg, #c5c5c5 0%, #d8d8d8 100%);
     }
 
     .date-badge {
@@ -579,9 +608,12 @@
   <div class="title-card">
     <div class="title-left">
       <span class="app-icon">📒</span>
-      <span class="app-title">每月帐目</span>
+      <span class="app-title">帐目记录</span>
     </div>
-    <span class="date-badge" id="currentDate"></span>
+    <div class="title-actions">
+      <button class="header-btn" id="addBankBtn" style="font-size: 1.2rem;">➕</button>
+      <button class="header-btn" id="menuBtn" style="font-size: 1.1rem;">☰</button>
+    </div>
   </div>
 
   <!-- 统计卡片 -->
@@ -597,7 +629,7 @@
     <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已收入 − 已支付）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
   </div>
 
-  <!-- 汇率 - 铅笔可点击聚焦输入框 -->
+  <!-- 汇率 -->
   <div class="rate-box">
     <span>🇸🇬 1 SGD = </span>
     <input type="number" id="exchangeRateInput" step="0.0001" min="0.1" value="3.0975">
@@ -607,12 +639,6 @@
 
   <!-- 分类列表容器 -->
   <div id="list" class="list"></div>
-
-  <!-- 菜单按钮区域 -->
-  <div style="display:flex; gap:10px; margin-top:4px;">
-    <button class="btn primary" id="addBankBtn" style="flex:1; border-radius:28px; width:auto;">➕ 添加分类</button>
-    <button class="btn primary" id="menuBtn" style="width:50px;">☰</button>
-  </div>
 
   <!-- 菜单 -->
   <div class="menu-overlay" id="menuOverlay">
@@ -670,7 +696,7 @@
 
 <script>
 (function() {
-  const STORAGE_KEY = 'ledger_fusion_v13';
+  const STORAGE_KEY = 'ledger_fusion_v14';
   const RATE_KEY = 'ledger_exchange_rate';
   let currentRate = 3.0975;
 
@@ -794,7 +820,7 @@
     if (savedRate && !isNaN(parseFloat(savedRate))) { currentRate = parseFloat(savedRate); rateInput.value = currentRate; } else { rateInput.value = currentRate; }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) { try { data = JSON.parse(saved); data = normalizeData(data); } catch(e) { data = { banks: [], transactions: [] }; } } else {
-      const oldKeys = ['ledger_fusion_v12','ledger_fusion_v11','ledger_fusion_v10','ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
+      const oldKeys = ['ledger_fusion_v13','ledger_fusion_v12','ledger_fusion_v11','ledger_fusion_v10','ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
       for(let k of oldKeys) { const oldSaved = localStorage.getItem(k); if(oldSaved){ try{ data = JSON.parse(oldSaved); data = normalizeData(data); saveData(); break; } catch(e){} } }
     }
     nextBankId = 1; data.banks.forEach(b => { if(b.id >= nextBankId) nextBankId = b.id+1; });
@@ -882,7 +908,7 @@
   }
 
   function generateNotes() {
-    let notes = '📒 每月帐目 · 记账笔记\n';
+    let notes = '📒 帐目记录 · 记账笔记\n';
     notes += `📅 生成时间：${new Date().toLocaleDateString('zh-CN')}\n`;
     notes += `💱 汇率：1 SGD = ${currentRate} MYR\n`;
     notes += '────────────────────────\n\n';
@@ -913,7 +939,7 @@
     }
     
     notes += '────────────────────────\n';
-    notes += '📱 每月帐目 · 记账工具\n';
+    notes += '📱 帐目记录 · 记账工具\n';
     return notes;
   }
 
@@ -929,7 +955,7 @@
   function render() {
     listEl.innerHTML = '';
     if(!data.banks || data.banks.length===0){ 
-      listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无分类</div><div class="empty-state-hint">点击下方按钮添加分类</div></div>'; 
+      listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无分类</div><div class="empty-state-hint">点击右上角➕添加分类</div></div>'; 
       updateSummary(); 
       return; 
     }
@@ -1479,7 +1505,10 @@
   window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferredPrompt=e; installBtn.style.display='flex'; });
   installBtn.addEventListener('click',async function(){ menuOverlay.classList.remove('show'); if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; }else showToast('请查看浏览器安装选项'); });
 
-  function setDate(){ currentDateEl.textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'}); }
+  function setDate(){ 
+    const now = new Date();
+    currentDateEl.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+  }
   setDate();
   loadData();
   render();
