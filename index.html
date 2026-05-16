@@ -153,10 +153,10 @@
       min-width: 0;
     }
 
-    .summary-card.income-got-card { background: linear-gradient(180deg, #e0f0e0 0%, #c8e0c8 100%); }
-    .summary-card.income-pending-card { background: linear-gradient(180deg, #fff0d8 0%, #f5e0c0 100%); }
-    .summary-card.expense-paid-card { background: linear-gradient(180deg, #fce8e8 0%, #f0d0d0 100%); }
-    .summary-card.expense-unpaid-card { background: linear-gradient(180deg, #f5e0dc 0%, #e8ccc8 100%); }
+    .summary-card.income-card { background: linear-gradient(180deg, #e0f0e0 0%, #c8e0c8 100%); }
+    .summary-card.expense-card { background: linear-gradient(180deg, #fce8e8 0%, #f0d0d0 100%); }
+    .summary-card.pending-income-card { background: linear-gradient(180deg, #fff0d8 0%, #f5e0c0 100%); }
+    .summary-card.pending-expense-card { background: linear-gradient(180deg, #f5e0dc 0%, #e8ccc8 100%); }
     .summary-card.net-card { background: linear-gradient(180deg, #e8e8f0 0%, #d0d0e0 100%); }
 
     .summary-label {
@@ -283,10 +283,10 @@
       background: rgba(0,0,0,0.08);
       backdrop-filter: blur(2px);
     }
-    .stat-inc-got { color: #1b5e20; background: #c8e6c9; }
-    .stat-inc-pending { color: #e65100; background: #ffe0b2; }
-    .stat-exp-paid { color: #b71c1c; background: #ffcdd2; }
-    .stat-exp-unpaid { color: #880e4f; background: #f8bbd0; }
+    .stat-income { color: #1b5e20; background: #c8e6c9; }
+    .stat-expense { color: #b71c1c; background: #ffcdd2; }
+    .stat-pending-income { color: #e65100; background: #ffe0b2; }
+    .stat-pending-expense { color: #880e4f; background: #f8bbd0; }
 
     .bank-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .collapse-icon { font-size: 0.75rem; opacity: 0.5; transition: transform 0.3s; width: 18px; text-align: center; }
@@ -554,17 +554,17 @@
     <span class="date-badge" id="currentDate"></span>
   </div>
 
-  <!-- 统计卡片 -->
+  <!-- 统计卡片（简化版） -->
   <div class="summary-section">
     <div class="summary-row">
-      <div class="summary-card income-got-card"><div class="summary-label"><span class="summary-dot green"></span>收入·已得</div><div class="summary-amount" id="incomeGotAmount">RM 0.00</div><div class="summary-count" id="incomeGotCount">0 笔</div></div>
-      <div class="summary-card income-pending-card"><div class="summary-label"><span class="summary-dot orange"></span>收入·未得</div><div class="summary-amount" id="incomePendingAmount">RM 0.00</div><div class="summary-count" id="incomePendingCount">0 笔</div></div>
+      <div class="summary-card income-card"><div class="summary-label"><span class="summary-dot green"></span>总收入</div><div class="summary-amount" id="totalIncome">RM 0.00</div><div class="summary-count" id="totalIncomeCount">0 笔</div></div>
+      <div class="summary-card expense-card"><div class="summary-label"><span class="summary-dot red"></span>总支付</div><div class="summary-amount" id="totalExpense">RM 0.00</div><div class="summary-count" id="totalExpenseCount">0 笔</div></div>
     </div>
     <div class="summary-row">
-      <div class="summary-card expense-paid-card"><div class="summary-label"><span class="summary-dot red"></span>支付·已缴</div><div class="summary-amount" id="expensePaidAmount">RM 0.00</div><div class="summary-count" id="expensePaidCount">0 笔</div></div>
-      <div class="summary-card expense-unpaid-card"><div class="summary-label"><span class="summary-dot deeppurple"></span>支付·未缴</div><div class="summary-amount" id="expenseUnpaidAmount">RM 0.00</div><div class="summary-count" id="expenseUnpaidCount">0 笔</div></div>
+      <div class="summary-card pending-income-card"><div class="summary-label"><span class="summary-dot orange"></span>待收</div><div class="summary-amount" id="pendingIncome">RM 0.00</div><div class="summary-count" id="pendingIncomeCount">0 笔</div></div>
+      <div class="summary-card pending-expense-card"><div class="summary-label"><span class="summary-dot deeppurple"></span>待付</div><div class="summary-amount" id="pendingExpense">RM 0.00</div><div class="summary-count" id="pendingExpenseCount">0 笔</div></div>
     </div>
-    <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已得 − 已缴）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
+    <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已收 − 已付）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
   </div>
 
   <!-- 汇率 -->
@@ -586,7 +586,7 @@
       <button class="btn" id="exportNotesBtn">📝 导出笔记</button>
       <button class="btn" id="exportBtn">📤 导出数据</button>
       <button class="btn" id="importBtn">📥 导入数据</button>
-      <button class="btn" id="resetStatusBtn" style="color:#e67e22;">🔄 全部标记为未缴/未得</button>
+      <button class="btn" id="toggleAllStatusBtn" style="color:#e67e22;">🔄 全部切换支付状态</button>
       <button class="btn confirm-danger" id="clearAllBtn">🧹 清空所有数据</button>
       <button class="btn" id="menuCloseBtn">关闭</button>
     </div>
@@ -600,10 +600,10 @@
 
   <!-- 添加/编辑交易 -->
   <div class="form-overlay" id="transactionFormOverlay">
-    <div class="form-panel"><div class="modal-title" id="transactionFormTitle">新增记录</div><input id="transactionNameInput" placeholder="名称（必填）"><input id="transactionAmountInput" type="number" placeholder="金额（必填）" step="0.01" min="0" onkeydown="if(event.key==='-'){event.preventDefault()}"><select id="transactionCurrency"><option value="MYR">MYR 马币</option><option value="SGD">SGD 新币</option></select><select id="transactionType"><option value="income">收入</option><option value="expense" selected>支付</option></select><select id="transactionStatus"><option value="unpaid">未缴/未得</option><option value="paid">已缴/已得</option></select><div class="row-buttons"><button id="transactionSaveBtn" class="btn">保存</button><button id="transactionCancelBtn" class="btn">取消</button></div></div>
+    <div class="form-panel"><div class="modal-title" id="transactionFormTitle">新增记录</div><input id="transactionNameInput" placeholder="名称（必填）"><input id="transactionAmountInput" type="number" placeholder="金额（必填）" step="0.01" min="0" onkeydown="if(event.key==='-'){event.preventDefault()}"><select id="transactionCurrency"><option value="MYR">MYR 马币</option><option value="SGD">SGD 新币</option></select><select id="transactionType"><option value="income">收入</option><option value="expense" selected>支付</option></select><select id="transactionStatus"><option value="unpaid">未支付</option><option value="paid">已支付</option></select><div class="row-buttons"><button id="transactionSaveBtn" class="btn">保存</button><button id="transactionCancelBtn" class="btn">取消</button></div></div>
   </div>
 
-  <!-- 导出笔记弹窗（简化版，无日期筛选，无预览按钮） -->
+  <!-- 导出笔记弹窗 -->
   <div class="form-overlay" id="exportNotesOverlay">
     <div class="form-panel" style="max-width: 420px;">
       <div class="modal-title">📝 导出笔记</div>
@@ -619,7 +619,7 @@
 
 <script>
 (function() {
-  const STORAGE_KEY = 'ledger_fusion_v9';
+  const STORAGE_KEY = 'ledger_fusion_v10';
   const RATE_KEY = 'ledger_exchange_rate';
   let currentRate = 3.0975;
 
@@ -639,14 +639,14 @@
   const rateInput = document.getElementById('exchangeRateInput');
   const currentDateEl = document.getElementById('currentDate');
 
-  const incomeGotAmountEl = document.getElementById('incomeGotAmount');
-  const incomeGotCountEl = document.getElementById('incomeGotCount');
-  const incomePendingAmountEl = document.getElementById('incomePendingAmount');
-  const incomePendingCountEl = document.getElementById('incomePendingCount');
-  const expensePaidAmountEl = document.getElementById('expensePaidAmount');
-  const expensePaidCountEl = document.getElementById('expensePaidCount');
-  const expenseUnpaidAmountEl = document.getElementById('expenseUnpaidAmount');
-  const expenseUnpaidCountEl = document.getElementById('expenseUnpaidCount');
+  const totalIncomeEl = document.getElementById('totalIncome');
+  const totalIncomeCountEl = document.getElementById('totalIncomeCount');
+  const totalExpenseEl = document.getElementById('totalExpense');
+  const totalExpenseCountEl = document.getElementById('totalExpenseCount');
+  const pendingIncomeEl = document.getElementById('pendingIncome');
+  const pendingIncomeCountEl = document.getElementById('pendingIncomeCount');
+  const pendingExpenseEl = document.getElementById('pendingExpense');
+  const pendingExpenseCountEl = document.getElementById('pendingExpenseCount');
   const netBalanceEl = document.getElementById('netBalanceDisplay');
 
   const bankFormOverlay = document.getElementById('bankFormOverlay');
@@ -702,7 +702,7 @@
     if (savedRate && !isNaN(parseFloat(savedRate))) { currentRate = parseFloat(savedRate); rateInput.value = currentRate; } else { rateInput.value = currentRate; }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) { try { data = JSON.parse(saved); data = normalizeData(data); } catch(e) { data = { banks: [], transactions: [] }; } } else {
-      const oldKeys = ['ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
+      const oldKeys = ['ledger_fusion_v9','ledger_fusion_v8','ledger_fusion_v7','ledger_fusion_v6','ledger_fusion_v5','ledger_fusion_v4','ledger_fusion_v3','ledger_fusion_v2','ledger_fusion_v1'];
       for(let k of oldKeys) { const oldSaved = localStorage.getItem(k); if(oldSaved){ try{ data = JSON.parse(oldSaved); data = normalizeData(data); saveData(); break; } catch(e){} } }
     }
     nextBankId = 1; data.banks.forEach(b => { if(b.id >= nextBankId) nextBankId = b.id+1; });
@@ -714,14 +714,64 @@
   function saveRate() { localStorage.setItem(RATE_KEY, currentRate); }
   function saveExpandedState() { localStorage.setItem('expandedBanks_fusion', JSON.stringify(expandedBanks)); }
   function getBankTransactions(bankId) { return data.transactions.filter(t => t.bankId === bankId); }
-  function getTotals() { let incGot=0,incPending=0,expPaid=0,expUnpaid=0,incGotC=0,incPendingC=0,expPaidC=0,expUnpaidC=0; data.transactions.forEach(t=>{ const amt = parseFloat(t.amountMYR)||0; if(t.type==='income' && t.status==='paid'){ incGot+=amt; incGotC++; } else if(t.type==='income' && t.status==='unpaid'){ incPending+=amt; incPendingC++; } else if(t.type==='expense' && t.status==='paid'){ expPaid+=amt; expPaidC++; } else if(t.type==='expense' && t.status==='unpaid'){ expUnpaid+=amt; expUnpaidC++; } }); const net = incGot - expPaid; return { incGot,incPending,expPaid,expUnpaid,incGotC,incPendingC,expPaidC,expUnpaidC,net }; }
-  function updateSummary() { const t = getTotals(); incomeGotAmountEl.textContent='RM '+t.incGot.toFixed(2); incomeGotCountEl.textContent=t.incGotC+' 笔'; incomePendingAmountEl.textContent='RM '+t.incPending.toFixed(2); incomePendingCountEl.textContent=t.incPendingC+' 笔'; expensePaidAmountEl.textContent='RM '+t.expPaid.toFixed(2); expensePaidCountEl.textContent=t.expPaidC+' 笔'; expenseUnpaidAmountEl.textContent='RM '+t.expUnpaid.toFixed(2); expenseUnpaidCountEl.textContent=t.expUnpaidC+' 笔'; netBalanceEl.textContent='RM '+t.net.toFixed(2); netBalanceEl.style.color=t.net>=0?'#2f6b44':'#c25a3a'; }
+  
+  function getTotals() { 
+    let totalInc=0, totalExp=0, pendingInc=0, pendingExp=0, incC=0, expC=0, pendingIncC=0, pendingExpC=0;
+    data.transactions.forEach(t=>{ 
+      const amt = parseFloat(t.amountMYR)||0; 
+      if(t.type==='income'){ 
+        totalInc+=amt; incC++;
+        if(t.status==='unpaid'){ pendingInc+=amt; pendingIncC++; }
+      } else { 
+        totalExp+=amt; expC++;
+        if(t.status==='unpaid'){ pendingExp+=amt; pendingExpC++; }
+      } 
+    }); 
+    const paidInc = totalInc - pendingInc;
+    const paidExp = totalExp - pendingExp;
+    const net = paidInc - paidExp;
+    return { totalInc, totalExp, pendingInc, pendingExp, incC, expC, pendingIncC, pendingExpC, net, paidInc, paidExp };
+  }
+  
+  function updateSummary() { 
+    const t = getTotals(); 
+    totalIncomeEl.textContent='RM '+t.totalInc.toFixed(2); 
+    totalIncomeCountEl.textContent=t.incC+' 笔'; 
+    totalExpenseEl.textContent='RM '+t.totalExp.toFixed(2); 
+    totalExpenseCountEl.textContent=t.expC+' 笔'; 
+    pendingIncomeEl.textContent='RM '+t.pendingInc.toFixed(2); 
+    pendingIncomeCountEl.textContent=t.pendingIncC+' 笔'; 
+    pendingExpenseEl.textContent='RM '+t.pendingExp.toFixed(2); 
+    pendingExpenseCountEl.textContent=t.pendingExpC+' 笔'; 
+    netBalanceEl.textContent='RM '+t.net.toFixed(2); 
+    netBalanceEl.style.color=t.net>=0?'#2f6b44':'#c25a3a'; 
+  }
 
-  function deleteBank(bankId, bankName) { const count = getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{ icon:'🗑️', confirmText:'确认删除', confirmClass:'confirm-danger' }).then(ok=>{ if(!ok)return; data.banks = data.banks.filter(b=>b.id!==bankId); data.transactions = data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); }); }
-  function editBank(bankId, bankName) { editingBankId = bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }
-  function getStatusLabel(status, type) { if(type==='income') return status==='paid'?'已得':'未得'; return status==='paid'?'已缴':'未缴'; }
+  function deleteBank(bankId, bankName) { 
+    const count = getBankTransactions(bankId).length; 
+    showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{ icon:'🗑️', confirmText:'确认删除', confirmClass:'confirm-danger' }).then(ok=>{ 
+      if(!ok)return; 
+      data.banks = data.banks.filter(b=>b.id!==bankId); 
+      data.transactions = data.transactions.filter(t=>t.bankId!==bankId); 
+      delete expandedBanks[bankId]; 
+      saveExpandedState(); 
+      saveData(); 
+      showToast('「'+bankName+'」已删除'); 
+      render(); 
+    }); 
+  }
+  
+  function editBank(bankId, bankName) { 
+    editingBankId = bankId; 
+    bankFormTitle.textContent='编辑分类'; 
+    bankNameInput.value=bankName; 
+    bankFormOverlay.classList.add('show'); 
+    setTimeout(()=>bankNameInput.focus(),150); 
+  }
+  
+  function getStatusLabel(status) { return status==='paid'?'已支付':'未支付'; }
 
-  // 生成笔记（不显示已缴/未缴/已得/未得状态）
+  // 生成笔记
   function generateNotes() {
     let notes = '📒 每月帐目 · 记账笔记\n';
     notes += `📅 生成时间：${new Date().toLocaleDateString('zh-CN')}\n`;
@@ -738,12 +788,12 @@
       if (transactions.length === 0) return;
       
       notes += `【${bank.name}】\n`;
-      // 按日期倒序排列（最新的在前）
       const sorted = [...transactions].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
       sorted.forEach(t => {
-        const prefix = t.type === 'income' ? '➕ 收入' : '➖ 支出';
+        const prefix = t.type === 'income' ? '➕ 收入' : '➖ 支付';
+        const statusText = t.status === 'paid' ? '✓已支付' : '○未支付';
         const currencyInfo = t.originalCurrency === 'SGD' ? ` (SGD ${t.originalAmount.toFixed(2)})` : '';
-        notes += `  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo}`;
+        notes += `  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo} [${statusText}]`;
         if (t.note && t.note.trim()) notes += ` ｜备注：${t.note}`;
         notes += '\n';
       });
@@ -771,36 +821,150 @@
   // 渲染主列表
   function render() {
     listEl.innerHTML = '';
-    if(!data.banks || data.banks.length===0){ listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无分类</div><div class="empty-state-hint">点击下方按钮添加分类</div></div>'; updateSummary(); return; }
+    if(!data.banks || data.banks.length===0){ 
+      listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无分类</div><div class="empty-state-hint">点击下方按钮添加分类</div></div>'; 
+      updateSummary(); 
+      return; 
+    }
+    
     data.banks.forEach(bank => {
       const bankTransactions = getBankTransactions(bank.id);
-      let incGot=0,incPending=0,expPaid=0,expUnpaid=0,incGotC=0,incPendingC=0,expPaidC=0,expUnpaidC=0,bankNet=0;
-      bankTransactions.forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income' && t.status==='paid'){ incGot+=amt; incGotC++; bankNet+=amt; } else if(t.type==='income' && t.status==='unpaid'){ incPending+=amt; incPendingC++; bankNet+=amt; } else if(t.type==='expense' && t.status==='paid'){ expPaid+=amt; expPaidC++; bankNet-=amt; } else if(t.type==='expense' && t.status==='unpaid'){ expUnpaid+=amt; expUnpaidC++; bankNet-=amt; } });
+      let totalInc=0, totalExp=0, pendingInc=0, pendingExp=0, incC=0, expC=0, pendingIncC=0, pendingExpC=0;
+      bankTransactions.forEach(t=>{ 
+        const amt=parseFloat(t.amountMYR)||0; 
+        if(t.type==='income'){ 
+          totalInc+=amt; incC++;
+          if(t.status==='unpaid'){ pendingInc+=amt; pendingIncC++; }
+        } else { 
+          totalExp+=amt; expC++;
+          if(t.status==='unpaid'){ pendingExp+=amt; pendingExpC++; }
+        } 
+      });
+      const bankNet = (totalInc - pendingInc) - (totalExp - pendingExp);
+      
       const isExpanded = expandedBanks[bank.id] !== false;
       const el = document.createElement('div');
       el.className = 'bank-group' + (isExpanded ? ' expanded' : '');
       el.dataset.bankId = bank.id;
-      const hasTransactions = incGotC+incPendingC+expPaidC+expUnpaidC > 0;
-      let statusStatsHtml = hasTransactions ? `<span class="stat-badge stat-inc-got">收入 ${incGotC}</span><span class="stat-badge stat-inc-pending">待收 ${incPendingC}</span><span class="stat-badge stat-exp-paid">已缴 ${expPaidC}</span><span class="stat-badge stat-exp-unpaid">未缴 ${expUnpaidC}</span>` : '<span style="font-size:0.65rem;opacity:0.4;">暂无记录</span>';
+      
+      let statusStatsHtml = '';
+      if(incC>0) statusStatsHtml += `<span class="stat-badge stat-income">收入 ${incC}</span>`;
+      if(expC>0) statusStatsHtml += `<span class="stat-badge stat-expense">支付 ${expC}</span>`;
+      if(pendingIncC>0) statusStatsHtml += `<span class="stat-badge stat-pending-income">待收 ${pendingIncC}</span>`;
+      if(pendingExpC>0) statusStatsHtml += `<span class="stat-badge stat-pending-expense">待付 ${pendingExpC}</span>`;
+      if(!statusStatsHtml) statusStatsHtml = '<span style="font-size:0.65rem;opacity:0.4;">暂无记录</span>';
+      
       let transactionsHtml = '';
-      bankTransactions.forEach(t => { const isIncome=t.type==='income'; const isPaid=t.status==='paid'; const currencyDisplay = t.originalCurrency==='SGD' ? `SGD ${t.originalAmount.toFixed(2)} → ` : ''; transactionsHtml += `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name-row"><span class="transaction-name">${escapeHtml(t.name)}</span></div><div class="badge-row"><span class="type-badge ${isIncome?'income':'expense'}">${isIncome?'收入':'支付'}</span><span class="status-badge ${isPaid?'paid':'unpaid'}">${getStatusLabel(t.status,t.type)}</span></div><div class="transaction-meta">${currencyDisplay}MYR ${parseFloat(t.amountMYR).toFixed(2)}</div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; });
+      bankTransactions.forEach(t => { 
+        const isIncome=t.type==='income'; 
+        const isPaid=t.status==='paid'; 
+        const currencyDisplay = t.originalCurrency==='SGD' ? `SGD ${t.originalAmount.toFixed(2)} → ` : ''; 
+        transactionsHtml += `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name-row"><span class="transaction-name">${escapeHtml(t.name)}</span></div><div class="badge-row"><span class="type-badge ${isIncome?'income':'expense'}">${isIncome?'收入':'支付'}</span><span class="status-badge ${isPaid?'paid':'unpaid'}">${getStatusLabel(t.status)}</span></div><div class="transaction-meta">${currencyDisplay}MYR ${parseFloat(t.amountMYR).toFixed(2)}</div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; 
+      });
       if(bankTransactions.length===0) transactionsHtml += '<div class="empty-hint">暂无记录</div>';
       transactionsHtml += `<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">🗑 删除分类</button></div>`;
+      
       el.innerHTML = `<div class="bank-header"><div class="bank-header-main"><span class="bank-handle">⋮⋮</span><span class="bank-icon">📁</span><div class="bank-header-info"><div class="bank-name-row"><span class="bank-name">${escapeHtml(bank.name)}</span><span class="bank-total" style="color:${bankNet>=0?'#2f6b44':'#c25a3a'}">RM ${bankNet.toFixed(2)}</span></div><div class="bank-status-stats">${statusStatsHtml}</div></div></div><div class="bank-header-actions"><span class="edit-bank-icon" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">✏️</span><span class="collapse-icon">▼</span></div></div><div class="bank-body"><div class="bank-items">${transactionsHtml}</div></div>`;
+      
       (function(bid){ el.querySelector('.bank-header').onclick = function(e){ if(e.target.closest('.bank-handle') || e.target.closest('.edit-bank-icon')) return; expandedBanks[bid] = !expandedBanks[bid]; saveExpandedState(); render(); }; })(bank.id);
       listEl.appendChild(el);
     });
+    
     // 事件委托
-    listEl.querySelectorAll('.toggle-status').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ t.status=t.status==='paid'?'unpaid':'paid'; saveData(); render(); } }; });
-    listEl.querySelectorAll('.edit-transaction').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ editingTransactionId=tid; transactionNameInput.value=t.name; transactionAmountInput.value=t.originalAmount; transactionCurrency.value=t.originalCurrency||'MYR'; transactionType.value=t.type||'expense'; transactionStatusEl.value=t.status||'unpaid'; openTransactionForm(t.bankId); } }; });
-    listEl.querySelectorAll('.del-transaction').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.transactions=data.transactions.filter(x=>x.id!==tid); saveData(); showToast('已删除'); render(); } }); } }; });
-    listEl.querySelectorAll('.add-transaction-btn').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; transactionCurrency.value='MYR'; transactionType.value='expense'; transactionStatusEl.value='unpaid'; openTransactionForm(bankId); }; });
-    listEl.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; deleteBank(bankId,bankName); }; });
-    listEl.querySelectorAll('.edit-bank-icon').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editBank(bankId,bankName); }; });
+    listEl.querySelectorAll('.toggle-status').forEach(btn=>{ 
+      btn.onclick=(e)=>{ 
+        e.stopPropagation(); 
+        const tid=parseInt(btn.dataset.transactionId); 
+        const t=data.transactions.find(x=>x.id===tid); 
+        if(t){ 
+          t.status=t.status==='paid'?'unpaid':'paid'; 
+          saveData(); 
+          render(); 
+        } 
+      }; 
+    });
+    listEl.querySelectorAll('.edit-transaction').forEach(btn=>{ 
+      btn.onclick=(e)=>{ 
+        e.stopPropagation(); 
+        const tid=parseInt(btn.dataset.transactionId); 
+        const t=data.transactions.find(x=>x.id===tid); 
+        if(t){ 
+          editingTransactionId=tid; 
+          transactionNameInput.value=t.name; 
+          transactionAmountInput.value=t.originalAmount; 
+          transactionCurrency.value=t.originalCurrency||'MYR'; 
+          transactionType.value=t.type||'expense'; 
+          transactionStatusEl.value=t.status||'unpaid'; 
+          openTransactionForm(t.bankId); 
+        } 
+      }; 
+    });
+    listEl.querySelectorAll('.del-transaction').forEach(btn=>{ 
+      btn.onclick=(e)=>{ 
+        e.stopPropagation(); 
+        const tid=parseInt(btn.dataset.transactionId); 
+        const t=data.transactions.find(x=>x.id===tid); 
+        if(t){ 
+          showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ 
+            if(ok){ 
+              data.transactions=data.transactions.filter(x=>x.id!==tid); 
+              saveData(); 
+              showToast('已删除'); 
+              render(); 
+            } 
+          }); 
+        } 
+      }; 
+    });
+    listEl.querySelectorAll('.add-transaction-btn').forEach(btn=>{ 
+      btn.onclick=(e)=>{ 
+        e.stopPropagation(); 
+        const bankId=parseInt(btn.dataset.bankId); 
+        editingTransactionId=null; 
+        transactionNameInput.value=''; 
+        transactionAmountInput.value=''; 
+        transactionCurrency.value='MYR'; 
+        transactionType.value='expense'; 
+        transactionStatusEl.value='unpaid'; 
+        openTransactionForm(bankId); 
+      }; 
+    });
+    listEl.querySelectorAll('.btn-delete-bank').forEach(btn=>{ 
+      btn.onclick=(e)=>{ 
+        e.stopPropagation(); 
+        const bankId=parseInt(btn.dataset.bankId); 
+        const bankName=btn.dataset.bankName; 
+        deleteBank(bankId,bankName); 
+      }; 
+    });
+    listEl.querySelectorAll('.edit-bank-icon').forEach(btn=>{ 
+      btn.onclick=(e)=>{ 
+        e.stopPropagation(); 
+        const bankId=parseInt(btn.dataset.bankId); 
+        const bankName=btn.dataset.bankName; 
+        editBank(bankId,bankName); 
+      }; 
+    });
+    
     // 拖拽绑定
-    listEl.querySelectorAll('.transaction-item').forEach(item=>{ item.setAttribute('draggable','true'); item.addEventListener('dragstart',handleTransactionDragStart); item.addEventListener('dragover',handleTransactionDragOver); item.addEventListener('drop',handleTransactionDrop); item.addEventListener('dragend',handleDragEnd); });
-    listEl.querySelectorAll('.bank-group').forEach(group=>{ group.setAttribute('draggable','true'); group.addEventListener('dragstart',handleBankDragStart); group.addEventListener('dragover',handleBankDragOver); group.addEventListener('drop',handleBankDrop); group.addEventListener('dragend',handleDragEnd); });
-    listEl.querySelectorAll('.bill-handle, .bank-handle').forEach(h=>{ h.removeEventListener('touchstart',handleTouchStart); h.addEventListener('touchstart',handleTouchStart,{passive:false}); });
+    listEl.querySelectorAll('.transaction-item').forEach(item=>{ 
+      item.setAttribute('draggable','true'); 
+      item.addEventListener('dragstart',handleTransactionDragStart); 
+      item.addEventListener('dragover',handleTransactionDragOver); 
+      item.addEventListener('drop',handleTransactionDrop); 
+      item.addEventListener('dragend',handleDragEnd); 
+    });
+    listEl.querySelectorAll('.bank-group').forEach(group=>{ 
+      group.setAttribute('draggable','true'); 
+      group.addEventListener('dragstart',handleBankDragStart); 
+      group.addEventListener('dragover',handleBankDragOver); 
+      group.addEventListener('drop',handleBankDrop); 
+      group.addEventListener('dragend',handleDragEnd); 
+    });
+    listEl.querySelectorAll('.bill-handle, .bank-handle').forEach(h=>{ 
+      h.removeEventListener('touchstart',handleTouchStart); 
+      h.addEventListener('touchstart',handleTouchStart,{passive:false}); 
+    });
     updateSummary();
   }
 
@@ -808,26 +972,295 @@
   function closeTransactionForm(){ transactionFormOverlay.classList.remove('show'); editingTransactionId=null; currentBankId=null; }
   transactionFormOverlay.addEventListener('click',e=>{ if(e.target===transactionFormOverlay) closeTransactionForm(); });
   transactionCancelBtn.onclick=closeTransactionForm;
-  transactionSaveBtn.onclick=function(){ const name=transactionNameInput.value.trim(); const amountRaw=transactionAmountInput.value; const currency=transactionCurrency.value; const type=transactionType.value; const status=transactionStatusEl.value; if(!name){ showToast('请输入名称'); return; } let amount=parseFloat(amountRaw); if(isNaN(amount)||amount<0){ showToast('请输入有效金额'); return; } let amountMYR=amount; if(currency==='SGD') amountMYR=amount*currentRate; let finalDate; if(editingTransactionId){ const t=data.transactions.find(x=>x.id===editingTransactionId); finalDate=t?t.date:''; }else{ const now=new Date(); finalDate=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'); } if(editingTransactionId){ const t=data.transactions.find(x=>x.id===editingTransactionId); if(t){ t.name=name; t.amountMYR=amountMYR; t.type=type; t.status=status; t.date=finalDate; t.originalCurrency=currency; t.originalAmount=amount; } }else{ data.transactions.push({ id:nextTransactionId, bankId:currentBankId, name, amountMYR, type, status, date:finalDate, originalCurrency:currency, originalAmount:amount }); nextTransactionId++; } saveData(); editingTransactionId=null; currentBankId=null; transactionNameInput.value=''; transactionAmountInput.value=''; closeTransactionForm(); showToast('已保存'); render(); };
+  transactionSaveBtn.onclick=function(){ 
+    const name=transactionNameInput.value.trim(); 
+    const amountRaw=transactionAmountInput.value; 
+    const currency=transactionCurrency.value; 
+    const type=transactionType.value; 
+    const status=transactionStatusEl.value; 
+    if(!name){ showToast('请输入名称'); return; } 
+    let amount=parseFloat(amountRaw); 
+    if(isNaN(amount)||amount<0){ showToast('请输入有效金额'); return; } 
+    let amountMYR=amount; 
+    if(currency==='SGD') amountMYR=amount*currentRate; 
+    let finalDate; 
+    if(editingTransactionId){ 
+      const t=data.transactions.find(x=>x.id===editingTransactionId); 
+      finalDate=t?t.date:''; 
+    }else{ 
+      const now=new Date(); 
+      finalDate=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'); 
+    } 
+    if(editingTransactionId){ 
+      const t=data.transactions.find(x=>x.id===editingTransactionId); 
+      if(t){ 
+        t.name=name; 
+        t.amountMYR=amountMYR; 
+        t.type=type; 
+        t.status=status; 
+        t.date=finalDate; 
+        t.originalCurrency=currency; 
+        t.originalAmount=amount; 
+      } 
+    }else{ 
+      data.transactions.push({ 
+        id:nextTransactionId, 
+        bankId:currentBankId, 
+        name, 
+        amountMYR, 
+        type, 
+        status, 
+        date:finalDate, 
+        originalCurrency:currency, 
+        originalAmount:amount 
+      }); 
+      nextTransactionId++; 
+    } 
+    saveData(); 
+    editingTransactionId=null; 
+    currentBankId=null; 
+    transactionNameInput.value=''; 
+    transactionAmountInput.value=''; 
+    closeTransactionForm(); 
+    showToast('已保存'); 
+    render(); 
+  };
 
   function openBankForm(){ bankFormTitle.textContent='添加分类'; editingBankId=null; bankNameInput.value=''; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }
   function closeBankForm(){ bankFormOverlay.classList.remove('show'); editingBankId=null; }
   bankFormOverlay.addEventListener('click',e=>{ if(e.target===bankFormOverlay) closeBankForm(); });
   bankCancelBtn.onclick=closeBankForm;
-  bankSaveBtn.onclick=function(){ const name=bankNameInput.value.trim(); if(!name){ showToast('请输入分类名称'); return; } if(editingBankId){ const bank=data.banks.find(b=>b.id===editingBankId); if(bank) bank.name=name; }else{ data.banks.push({ id:nextBankId, name }); expandedBanks[nextBankId]=true; saveExpandedState(); nextBankId++; } saveData(); editingBankId=null; bankNameInput.value=''; closeBankForm(); showToast('分类已保存'); render(); };
+  bankSaveBtn.onclick=function(){ 
+    const name=bankNameInput.value.trim(); 
+    if(!name){ showToast('请输入分类名称'); return; } 
+    if(editingBankId){ 
+      const bank=data.banks.find(b=>b.id===editingBankId); 
+      if(bank) bank.name=name; 
+    }else{ 
+      data.banks.push({ id:nextBankId, name }); 
+      expandedBanks[nextBankId]=true; 
+      saveExpandedState(); 
+      nextBankId++; 
+    } 
+    saveData(); 
+    editingBankId=null; 
+    bankNameInput.value=''; 
+    closeBankForm(); 
+    showToast('分类已保存'); 
+    render(); 
+  };
 
   // 拖拽函数
-  function handleBankDragStart(e){ const g=e.target.closest('.bank-group'); if(!g||!e.target.closest('.bank-handle')){ e.preventDefault(); return; } e.stopPropagation(); draggedItem=g; draggedItemType='bank'; draggedItemId=parseInt(g.dataset.bankId); dragOverItem=null; g.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
-  function handleBankDragOver(e){ e.preventDefault(); e.stopPropagation(); const g=e.target.closest('.bank-group'); if(!g||!draggedItem||draggedItemType!=='bank'||g===draggedItem) return; if(dragOverItem) dragOverItem.classList.remove('drag-over'); dragOverItem=g; g.classList.add('drag-over'); }
-  function handleBankDrop(e){ e.preventDefault(); e.stopPropagation(); if(!draggedItem||draggedItemType!=='bank') return; if(dragOverItem) dragOverItem.classList.remove('drag-over'); draggedItem.classList.remove('dragging'); if(!dragOverItem||dragOverItem===draggedItem){ resetDragState(); return; } const fi=data.banks.findIndex(b=>b.id===draggedItemId); const ti=data.banks.findIndex(b=>b.id===parseInt(dragOverItem.dataset.bankId)); if(fi>=0&&ti>=0&&fi!==ti){ data.banks.splice(ti,0,data.banks.splice(fi,1)[0]); saveData(); showToast('已调整顺序'); } resetDragState(); render(); }
-  function handleTransactionDragStart(e){ const item=e.target.closest('.transaction-item'); if(!item||!e.target.closest('.bill-handle')){ e.preventDefault(); return; } e.stopPropagation(); draggedItem=item; draggedItemType='transaction'; draggedItemId=parseInt(item.dataset.transactionId); const bg=item.closest('.bank-group'); draggedItemBankId=bg?parseInt(bg.dataset.bankId):null; dragOverItem=null; item.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; }
-  function handleTransactionDragOver(e){ e.preventDefault(); e.stopPropagation(); const item=e.target.closest('.transaction-item'); if(!item||!draggedItem||draggedItemType!=='transaction'||item===draggedItem) return; const tbg=item.closest('.bank-group'); if(parseInt(tbg?.dataset?.bankId)!==draggedItemBankId) return; if(dragOverItem) dragOverItem.classList.remove('drag-over'); dragOverItem=item; item.classList.add('drag-over'); }
-  function handleTransactionDrop(e){ e.preventDefault(); e.stopPropagation(); if(!draggedItem||draggedItemType!=='transaction') return; if(dragOverItem) dragOverItem.classList.remove('drag-over'); draggedItem.classList.remove('dragging'); if(!dragOverItem||dragOverItem===draggedItem){ resetDragState(); return; } const bb=data.transactions.filter(x=>x.bankId===draggedItemBankId); const fi=bb.findIndex(x=>x.id===draggedItemId); const ti=bb.findIndex(x=>x.id===parseInt(dragOverItem.dataset.transactionId)); if(fi>=0&&ti>=0&&fi!==ti){ bb.splice(ti,0,bb.splice(fi,1)[0]); data.transactions=data.transactions.filter(x=>x.bankId!==draggedItemBankId).concat(bb); saveData(); showToast('已调整顺序'); } resetDragState(); render(); }
-  function handleDragEnd(){ if(draggedItem) draggedItem.classList.remove('dragging'); if(dragOverItem) dragOverItem.classList.remove('drag-over'); resetDragState(); }
-  function resetDragState(){ draggedItem=null; draggedItemType=null; draggedItemId=null; draggedItemBankId=null; dragOverItem=null; }
-  function handleTouchStart(e){ const t=e.target; const bh=t.closest('.bill-handle'); const kh=t.closest('.bank-handle'); if(bh||kh){ touchStartElement=bh||kh; touchStartY=e.touches[0].clientY; touchStartX=e.touches[0].clientX; isDraggingActive=false; touchLongPressTimer=setTimeout(()=>{ isDraggingActive=true; if(bh){ const bi=bh.closest('.transaction-item'); if(bi){ touchDraggedItem=bi; touchDraggedItemType='transaction'; touchDraggedItemId=parseInt(bi.dataset.transactionId); touchDraggedItemBankId=parseInt(bi.closest('.bank-group')?.dataset?.bankId); touchDraggedItem.classList.add('dragging'); touchClone=touchDraggedItem.cloneNode(true); touchClone.style.cssText='position:fixed;z-index:1000;opacity:0.8;pointer-events:none;width:'+touchDraggedItem.offsetWidth+'px;'; touchClone.style.left=touchDraggedItem.getBoundingClientRect().left+'px'; touchClone.style.top=touchStartY-30+'px'; document.body.appendChild(touchClone); showToast('长按移动可排序'); } }else if(kh){ const bg=kh.closest('.bank-group'); if(bg){ touchDraggedItem=bg; touchDraggedItemType='bank'; touchDraggedItemId=parseInt(bg.dataset.bankId); touchDraggedItem.classList.add('dragging'); touchClone=touchDraggedItem.cloneNode(true); touchClone.style.cssText='position:fixed;z-index:1000;opacity:0.8;pointer-events:none;width:'+touchDraggedItem.offsetWidth+'px;'; touchClone.style.left=touchDraggedItem.getBoundingClientRect().left+'px'; touchClone.style.top=touchStartY-30+'px'; document.body.appendChild(touchClone); showToast('长按移动可排序'); } } },200); } }
-  function handleTouchMove(e){ if(!touchLongPressTimer) return; if(Math.abs(e.touches[0].clientY-touchStartY)>8||Math.abs(e.touches[0].clientX-touchStartX)>8){ if(!isDraggingActive){ clearTimeout(touchLongPressTimer); touchLongPressTimer=null; touchStartElement=null; } } if(!isDraggingActive||!touchDraggedItem) return; e.preventDefault(); if(touchClone){ touchClone.style.top=(e.touches[0].clientY-30)+'px'; touchClone.style.left=(e.touches[0].clientX-20)+'px'; } const elBelow=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); if(dragOverItem) dragOverItem.classList.remove('drag-over'); if(touchDraggedItemType==='transaction'){ const bBelow=elBelow?.closest('.transaction-item'); if(bBelow&&bBelow!==touchDraggedItem&&parseInt(bBelow.closest('.bank-group')?.dataset?.bankId)===touchDraggedItemBankId){ dragOverItem=bBelow; bBelow.classList.add('drag-over'); } }else if(touchDraggedItemType==='bank'){ const gBelow=elBelow?.closest('.bank-group'); if(gBelow&&gBelow!==touchDraggedItem){ dragOverItem=gBelow; gBelow.classList.add('drag-over'); } } }
-  function handleTouchEnd(){ if(touchLongPressTimer){ clearTimeout(touchLongPressTimer); touchLongPressTimer=null; } if(touchClone){ document.body.removeChild(touchClone); touchClone=null; } if(touchDraggedItem) touchDraggedItem.classList.remove('dragging'); if(dragOverItem) dragOverItem.classList.remove('drag-over'); if(isDraggingActive&&dragOverItem&&dragOverItem!==touchDraggedItem){ if(touchDraggedItemType==='bank'){ const fi=data.banks.findIndex(x=>x.id===touchDraggedItemId); const ti=data.banks.findIndex(x=>x.id===parseInt(dragOverItem.dataset.bankId)); if(fi>=0&&ti>=0&&fi!==ti){ data.banks.splice(ti,0,data.banks.splice(fi,1)[0]); saveData(); showToast('已调整顺序'); render(); } }else if(touchDraggedItemType==='transaction'){ const bb=data.transactions.filter(x=>x.bankId===touchDraggedItemBankId); const fi=bb.findIndex(x=>x.id===touchDraggedItemId); const ti=bb.findIndex(x=>x.id===parseInt(dragOverItem.dataset.transactionId)); if(fi>=0&&ti>=0&&fi!==ti){ bb.splice(ti,0,bb.splice(fi,1)[0]); data.transactions=data.transactions.filter(x=>x.bankId!==touchDraggedItemBankId).concat(bb); saveData(); showToast('已调整顺序'); render(); } } } touchDraggedItem=null; touchDraggedItemType=null; touchDraggedItemId=null; touchDraggedItemBankId=null; touchStartElement=null; isDraggingActive=false; dragOverItem=null; }
+  function handleBankDragStart(e){ 
+    const g=e.target.closest('.bank-group'); 
+    if(!g||!e.target.closest('.bank-handle')){ e.preventDefault(); return; } 
+    e.stopPropagation(); 
+    draggedItem=g; 
+    draggedItemType='bank'; 
+    draggedItemId=parseInt(g.dataset.bankId); 
+    dragOverItem=null; 
+    g.classList.add('dragging'); 
+    e.dataTransfer.effectAllowed='move'; 
+  }
+  function handleBankDragOver(e){ 
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    const g=e.target.closest('.bank-group'); 
+    if(!g||!draggedItem||draggedItemType!=='bank'||g===draggedItem) return; 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    dragOverItem=g; 
+    g.classList.add('drag-over'); 
+  }
+  function handleBankDrop(e){ 
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    if(!draggedItem||draggedItemType!=='bank') return; 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    draggedItem.classList.remove('dragging'); 
+    if(!dragOverItem||dragOverItem===draggedItem){ resetDragState(); return; } 
+    const fi=data.banks.findIndex(b=>b.id===draggedItemId); 
+    const ti=data.banks.findIndex(b=>b.id===parseInt(dragOverItem.dataset.bankId)); 
+    if(fi>=0&&ti>=0&&fi!==ti){ 
+      data.banks.splice(ti,0,data.banks.splice(fi,1)[0]); 
+      saveData(); 
+      showToast('已调整顺序'); 
+    } 
+    resetDragState(); 
+    render(); 
+  }
+  function handleTransactionDragStart(e){ 
+    const item=e.target.closest('.transaction-item'); 
+    if(!item||!e.target.closest('.bill-handle')){ e.preventDefault(); return; } 
+    e.stopPropagation(); 
+    draggedItem=item; 
+    draggedItemType='transaction'; 
+    draggedItemId=parseInt(item.dataset.transactionId); 
+    const bg=item.closest('.bank-group'); 
+    draggedItemBankId=bg?parseInt(bg.dataset.bankId):null; 
+    dragOverItem=null; 
+    item.classList.add('dragging'); 
+    e.dataTransfer.effectAllowed='move'; 
+  }
+  function handleTransactionDragOver(e){ 
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    const item=e.target.closest('.transaction-item'); 
+    if(!item||!draggedItem||draggedItemType!=='transaction'||item===draggedItem) return; 
+    const tbg=item.closest('.bank-group'); 
+    if(parseInt(tbg?.dataset?.bankId)!==draggedItemBankId) return; 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    dragOverItem=item; 
+    item.classList.add('drag-over'); 
+  }
+  function handleTransactionDrop(e){ 
+    e.preventDefault(); 
+    e.stopPropagation(); 
+    if(!draggedItem||draggedItemType!=='transaction') return; 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    draggedItem.classList.remove('dragging'); 
+    if(!dragOverItem||dragOverItem===draggedItem){ resetDragState(); return; } 
+    const bb=data.transactions.filter(x=>x.bankId===draggedItemBankId); 
+    const fi=bb.findIndex(x=>x.id===draggedItemId); 
+    const ti=bb.findIndex(x=>x.id===parseInt(dragOverItem.dataset.transactionId)); 
+    if(fi>=0&&ti>=0&&fi!==ti){ 
+      bb.splice(ti,0,bb.splice(fi,1)[0]); 
+      data.transactions=data.transactions.filter(x=>x.bankId!==draggedItemBankId).concat(bb); 
+      saveData(); 
+      showToast('已调整顺序'); 
+    } 
+    resetDragState(); 
+    render(); 
+  }
+  function handleDragEnd(){ 
+    if(draggedItem) draggedItem.classList.remove('dragging'); 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    resetDragState(); 
+  }
+  function resetDragState(){ 
+    draggedItem=null; 
+    draggedItemType=null; 
+    draggedItemId=null; 
+    draggedItemBankId=null; 
+    dragOverItem=null; 
+  }
+  
+  function handleTouchStart(e){ 
+    const t=e.target; 
+    const bh=t.closest('.bill-handle'); 
+    const kh=t.closest('.bank-handle'); 
+    if(bh||kh){ 
+      touchStartElement=bh||kh; 
+      touchStartY=e.touches[0].clientY; 
+      touchStartX=e.touches[0].clientX; 
+      isDraggingActive=false; 
+      touchLongPressTimer=setTimeout(()=>{ 
+        isDraggingActive=true; 
+        if(bh){ 
+          const bi=bh.closest('.transaction-item'); 
+          if(bi){ 
+            touchDraggedItem=bi; 
+            touchDraggedItemType='transaction'; 
+            touchDraggedItemId=parseInt(bi.dataset.transactionId); 
+            touchDraggedItemBankId=parseInt(bi.closest('.bank-group')?.dataset?.bankId); 
+            touchDraggedItem.classList.add('dragging'); 
+            touchClone=touchDraggedItem.cloneNode(true); 
+            touchClone.style.cssText='position:fixed;z-index:1000;opacity:0.8;pointer-events:none;width:'+touchDraggedItem.offsetWidth+'px;'; 
+            touchClone.style.left=touchDraggedItem.getBoundingClientRect().left+'px'; 
+            touchClone.style.top=touchStartY-30+'px'; 
+            document.body.appendChild(touchClone); 
+            showToast('长按移动可排序'); 
+          } 
+        }else if(kh){ 
+          const bg=kh.closest('.bank-group'); 
+          if(bg){ 
+            touchDraggedItem=bg; 
+            touchDraggedItemType='bank'; 
+            touchDraggedItemId=parseInt(bg.dataset.bankId); 
+            touchDraggedItem.classList.add('dragging'); 
+            touchClone=touchDraggedItem.cloneNode(true); 
+            touchClone.style.cssText='position:fixed;z-index:1000;opacity:0.8;pointer-events:none;width:'+touchDraggedItem.offsetWidth+'px;'; 
+            touchClone.style.left=touchDraggedItem.getBoundingClientRect().left+'px'; 
+            touchClone.style.top=touchStartY-30+'px'; 
+            document.body.appendChild(touchClone); 
+            showToast('长按移动可排序'); 
+          } 
+        } 
+      },200); 
+    } 
+  }
+  function handleTouchMove(e){ 
+    if(!touchLongPressTimer) return; 
+    if(Math.abs(e.touches[0].clientY-touchStartY)>8||Math.abs(e.touches[0].clientX-touchStartX)>8){ 
+      if(!isDraggingActive){ 
+        clearTimeout(touchLongPressTimer); 
+        touchLongPressTimer=null; 
+        touchStartElement=null; 
+      } 
+    } 
+    if(!isDraggingActive||!touchDraggedItem) return; 
+    e.preventDefault(); 
+    if(touchClone){ 
+      touchClone.style.top=(e.touches[0].clientY-30)+'px'; 
+      touchClone.style.left=(e.touches[0].clientX-20)+'px'; 
+    } 
+    const elBelow=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    if(touchDraggedItemType==='transaction'){ 
+      const bBelow=elBelow?.closest('.transaction-item'); 
+      if(bBelow&&bBelow!==touchDraggedItem&&parseInt(bBelow.closest('.bank-group')?.dataset?.bankId)===touchDraggedItemBankId){ 
+        dragOverItem=bBelow; 
+        bBelow.classList.add('drag-over'); 
+      } 
+    }else if(touchDraggedItemType==='bank'){ 
+      const gBelow=elBelow?.closest('.bank-group'); 
+      if(gBelow&&gBelow!==touchDraggedItem){ 
+        dragOverItem=gBelow; 
+        gBelow.classList.add('drag-over'); 
+      } 
+    } 
+  }
+  function handleTouchEnd(){ 
+    if(touchLongPressTimer){ 
+      clearTimeout(touchLongPressTimer); 
+      touchLongPressTimer=null; 
+    } 
+    if(touchClone){ 
+      document.body.removeChild(touchClone); 
+      touchClone=null; 
+    } 
+    if(touchDraggedItem) touchDraggedItem.classList.remove('dragging'); 
+    if(dragOverItem) dragOverItem.classList.remove('drag-over'); 
+    if(isDraggingActive&&dragOverItem&&dragOverItem!==touchDraggedItem){ 
+      if(touchDraggedItemType==='bank'){ 
+        const fi=data.banks.findIndex(x=>x.id===touchDraggedItemId); 
+        const ti=data.banks.findIndex(x=>x.id===parseInt(dragOverItem.dataset.bankId)); 
+        if(fi>=0&&ti>=0&&fi!==ti){ 
+          data.banks.splice(ti,0,data.banks.splice(fi,1)[0]); 
+          saveData(); 
+          showToast('已调整顺序'); 
+          render(); 
+        } 
+      }else if(touchDraggedItemType==='transaction'){ 
+        const bb=data.transactions.filter(x=>x.bankId===touchDraggedItemBankId); 
+        const fi=bb.findIndex(x=>x.id===touchDraggedItemId); 
+        const ti=bb.findIndex(x=>x.id===parseInt(dragOverItem.dataset.transactionId)); 
+        if(fi>=0&&ti>=0&&fi!==ti){ 
+          bb.splice(ti,0,bb.splice(fi,1)[0]); 
+          data.transactions=data.transactions.filter(x=>x.bankId!==touchDraggedItemBankId).concat(bb); 
+          saveData(); 
+          showToast('已调整顺序'); 
+          render(); 
+        } 
+      } 
+    } 
+    touchDraggedItem=null; 
+    touchDraggedItemType=null; 
+    touchDraggedItemId=null; 
+    touchDraggedItemBankId=null; 
+    touchStartElement=null; 
+    isDraggingActive=false; 
+    dragOverItem=null; 
+  }
 
   document.addEventListener('touchmove',function(e){ if(isDraggingActive) handleTouchMove(e); },{passive:false});
   document.addEventListener('touchend',handleTouchEnd);
@@ -838,7 +1271,22 @@
   menuOverlay.addEventListener('click', e => { if(e.target === menuOverlay) menuOverlay.classList.remove('show'); });
   document.getElementById('exportBtn').onclick = () => { menuOverlay.classList.remove('show'); const j=JSON.stringify(data,null,2); const b=new Blob([j],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='ledger-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); URL.revokeObjectURL(u); showToast('导出成功'); };
   document.getElementById('importBtn').onclick = () => { menuOverlay.classList.remove('show'); importFile.click(); };
-  document.getElementById('resetStatusBtn').onclick = () => { menuOverlay.classList.remove('show'); const paidCount=data.transactions.filter(t=>t.status==='paid').length; if(paidCount===0){ showToast('没有需要重置的记录'); return; } showModal('确定将所有 '+paidCount+' 条已缴/已得记录标为未缴/未得吗？',{icon:'🔄',confirmText:'确认重置',confirmClass:'confirm-safe'}).then(ok=>{ if(ok){ data.transactions.forEach(t=>{ if(t.status==='paid') t.status='unpaid'; }); saveData(); showToast('已重置 '+paidCount+' 条记录'); render(); } }); };
+  document.getElementById('toggleAllStatusBtn').onclick = () => { 
+    menuOverlay.classList.remove('show'); 
+    const paidCount=data.transactions.filter(t=>t.status==='paid').length; 
+    const unpaidCount=data.transactions.length-paidCount;
+    if(data.transactions.length===0){ showToast('没有记录可切换'); return; }
+    const action = paidCount > unpaidCount ? '将所有已支付改为未支付' : '将所有未支付改为已支付';
+    showModal(`确定${action}吗？`,{icon:'🔄',confirmText:'确认',confirmClass:'confirm-safe'}).then(ok=>{ 
+      if(ok){ 
+        const newStatus = paidCount > unpaidCount ? 'unpaid' : 'paid';
+        data.transactions.forEach(t=>{ t.status=newStatus; }); 
+        saveData(); 
+        showToast(`已全部改为${newStatus==='paid'?'已支付':'未支付'}`); 
+        render(); 
+      } 
+    }); 
+  };
   document.getElementById('clearAllBtn').onclick = () => { menuOverlay.classList.remove('show'); showModal('确定清空所有数据吗？',{icon:'⚠️',confirmText:'清空',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data={banks:[],transactions:[]}; expandedBanks={}; nextBankId=1; nextTransactionId=1; saveExpandedState(); saveData(); showToast('已清空'); render(); } }); };
   document.getElementById('addBankBtn').onclick = () => openBankForm();
   exportNotesBtn.onclick = openExportNotes;
