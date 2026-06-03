@@ -240,7 +240,7 @@
 </div>
 <script>
   (function(){
-    const STORAGE_KEY='ledger_fusion_v16', RATE_KEY='ledger_exchange_rate';
+    const STORAGE_KEY='ledger_fusion_v17', RATE_KEY='ledger_exchange_rate';
     let currentRate=3.0975, data={banks:[], transactions:[]}, nextBankId=1, nextTransactionId=1, expandedBanks={}, editingTransactionId=null, editingBankId=null, currentBankId=null;
     const listEl=document.getElementById('list'), toastEl=document.getElementById('toast'), rateInput=document.getElementById('exchangeRateInput');
     const totalIncomeEl=document.getElementById('totalIncome'), totalIncomeCountEl=document.getElementById('totalIncomeCount'), totalExpenseEl=document.getElementById('totalExpense'), totalExpenseCountEl=document.getElementById('totalExpenseCount'), pendingIncomeEl=document.getElementById('pendingIncome'), pendingIncomeCountEl=document.getElementById('pendingIncomeCount'), pendingExpenseEl=document.getElementById('pendingExpense'), pendingExpenseCountEl=document.getElementById('pendingExpenseCount'), netBalanceEl=document.getElementById('netBalanceDisplay');
@@ -249,10 +249,55 @@
     const modalOverlay=document.getElementById('modalOverlay'), modalMessage=document.getElementById('modalMessage'), modalConfirm=document.getElementById('modalConfirm'), modalCancel=document.getElementById('modalCancel'), clearConfirmOverlay=document.getElementById('clearConfirmOverlay'), clearConfirmInput=document.getElementById('clearConfirmInput'), clearConfirmCancel=document.getElementById('clearConfirmCancel'), clearConfirmOk=document.getElementById('clearConfirmOk'), menuOverlay=document.getElementById('menuOverlay'), menuBtn=document.getElementById('menuBtn'), menuCloseBtn=document.getElementById('menuCloseBtn'), importFile=document.getElementById('importFile'), exportNotesBtn=document.getElementById('exportNotesBtn'), exportNotesOverlay=document.getElementById('exportNotesOverlay'), notesPreview=document.getElementById('notesPreview'), copyNotesBtn=document.getElementById('copyNotesBtn'), downloadNotesBtn=document.getElementById('downloadNotesBtn'), closeNotesBtn=document.getElementById('closeNotesBtn'), installBtn=document.getElementById('installAppBtn'), rateEditIcon=document.getElementById('rateEditIcon');
     let toastTimer, modalResolve=null;
     
-    // ======================= 拖拽系统（完美版） =======================
+    // 智能排序：将记录移动到同分类的底部或顶部
+    function moveTransactionToBottom(tid, bankId) {
+        const bankTransactions = data.transactions.filter(tr => tr.bankId === bankId);
+        const currentIndex = bankTransactions.findIndex(tr => tr.id === tid);
+        if (currentIndex === -1) return false;
+        
+        // 找到该记录在全局数组中的位置
+        const globalIndex = data.transactions.findIndex(tr => tr.id === tid);
+        if (globalIndex === -1) return false;
+        
+        // 找到该分类最后一条记录在全局数组中的位置
+        const lastTransaction = bankTransactions[bankTransactions.length - 1];
+        const lastGlobalIndex = data.transactions.findIndex(tr => tr.id === lastTransaction.id);
+        
+        if (globalIndex !== lastGlobalIndex) {
+            const [moved] = data.transactions.splice(globalIndex, 1);
+            // 如果移动的元素原来在最后一条之后，需要调整插入位置
+            let insertPos = lastGlobalIndex;
+            if (globalIndex < lastGlobalIndex) insertPos = lastGlobalIndex;
+            else insertPos = lastGlobalIndex;
+            data.transactions.splice(insertPos + 1, 0, moved);
+        }
+        return true;
+    }
+    
+    function moveTransactionToTop(tid, bankId) {
+        const bankTransactions = data.transactions.filter(tr => tr.bankId === bankId);
+        const currentIndex = bankTransactions.findIndex(tr => tr.id === tid);
+        if (currentIndex === -1) return false;
+        
+        const globalIndex = data.transactions.findIndex(tr => tr.id === tid);
+        if (globalIndex === -1) return false;
+        
+        const firstTransaction = bankTransactions[0];
+        const firstGlobalIndex = data.transactions.findIndex(tr => tr.id === firstTransaction.id);
+        
+        if (globalIndex !== firstGlobalIndex) {
+            const [moved] = data.transactions.splice(globalIndex, 1);
+            let insertPos = firstGlobalIndex;
+            if (globalIndex < firstGlobalIndex) insertPos = firstGlobalIndex - 1;
+            data.transactions.splice(insertPos, 0, moved);
+        }
+        return true;
+    }
+    
+    // ======================= 拖拽系统 =======================
     let dragState = {
         isDragging: false,
-        dragType: null, // 'bank' 或 'transaction'
+        dragType: null,
         dragElement: null,
         dragId: null,
         dragBankId: null,
@@ -264,14 +309,12 @@
     };
     
     function initDragAndDrop() {
-        // 绑定分类拖拽手柄
         document.querySelectorAll('.bank-handle').forEach(handle => {
             handle.removeEventListener('touchstart', onDragStart);
             handle.removeEventListener('mousedown', onDragStart);
             handle.addEventListener('touchstart', onDragStart, { passive: false });
             handle.addEventListener('mousedown', onDragStart);
         });
-        // 绑定记录拖拽手柄
         document.querySelectorAll('.bill-handle').forEach(handle => {
             handle.removeEventListener('touchstart', onDragStart);
             handle.removeEventListener('mousedown', onDragStart);
@@ -476,7 +519,33 @@
         const headerEl=groupDiv.querySelector('.bank-header'); headerEl.onclick=e=>{ if(e.target.closest('.bank-handle')||e.target.closest('.edit-bank-icon')) return; expandedBanks[bank.id]=!expandedBanks[bank.id]; saveExpandedState(); render(); };
         listEl.appendChild(groupDiv);
       });
-      document.querySelectorAll('.toggle-status').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ t.status=t.status==='paid'?'unpaid':'paid'; saveData(); render(); } }; });
+      
+      // 状态切换按钮 - 带智能排序
+      document.querySelectorAll('.toggle-status').forEach(btn=>{ 
+        btn.onclick=e=>{ 
+          e.stopPropagation(); 
+          const tid=parseInt(btn.dataset.transactionId); 
+          const t=data.transactions.find(x=>x.id===tid); 
+          if(t){ 
+            const oldStatus = t.status;
+            const newStatus = oldStatus === 'paid' ? 'unpaid' : 'paid';
+            t.status = newStatus;
+            
+            // 智能排序：已支付/已收入移到底部，未支付/未收入移到顶部
+            if (newStatus === 'paid') {
+              moveTransactionToBottom(tid, t.bankId);
+              showToast('已支付，已移至底部');
+            } else {
+              moveTransactionToTop(tid, t.bankId);
+              showToast('未支付，已移至顶部');
+            }
+            
+            saveData(); 
+            render(); 
+          } 
+        }; 
+      });
+      
       document.querySelectorAll('.edit-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ editingTransactionId=tid; transactionNameInput.value=t.name; transactionAmountInput.value=t.originalAmount; transactionCurrency.value=t.originalCurrency||'MYR'; transactionType.value=t.type||'expense'; transactionStatusEl.value=t.status||'unpaid'; openTransactionForm(t.bankId); } }; });
       document.querySelectorAll('.del-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.transactions=data.transactions.filter(x=>x.id!==tid); saveData(); showToast('已删除'); render(); } }); } }; });
       document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; transactionCurrency.value='MYR'; transactionType.value='expense'; transactionStatusEl.value='unpaid'; openTransactionForm(bankId); }; });
