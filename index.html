@@ -134,8 +134,9 @@
       box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.08), -4px -4px 10px rgba(255, 255, 255, 0.7);
       overflow: hidden;
       margin-bottom: 12px;
+      transition: opacity 0.2s, box-shadow 0.2s;
     }
-    .bank-group.dragging { opacity: 0.6; }
+    .bank-group.dragging { opacity: 0.4; cursor: grabbing; }
     .bank-group.drag-over { box-shadow: 0 0 0 3px #5b8c7e; }
     .bank-header {
       display: flex;
@@ -144,13 +145,12 @@
       cursor: pointer;
       gap: 10px;
     }
-    .bank-handle { cursor: grab; font-size: 1.2rem; opacity: 0.35; padding: 0 4px; flex-shrink: 0; }
+    .bank-handle { cursor: grab; font-size: 1.2rem; opacity: 0.35; padding: 0 4px; flex-shrink: 0; touch-action: none; }
     .bank-handle:active { cursor: grabbing; }
     .bank-header-main { display: flex; align-items: center; gap: 8px; flex: 1; }
     .bank-icon { font-size: 1.2rem; }
     .bank-header-info { flex: 1; }
     .bank-name { font-weight: 700; font-size: 0.9rem; }
-    .bank-total { font-weight: 800; font-size: 0.9rem; margin-left: auto; }
     .bank-header-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .collapse-icon { font-size: 0.75rem; opacity: 0.5; transition: transform 0.3s; }
     .bank-group:not(.expanded) .collapse-icon { transform: rotate(-90deg); }
@@ -159,16 +159,19 @@
     .bank-group.expanded .bank-body { max-height: 2000px; }
     .bank-items { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 8px; }
     .bank-items-footer { display: flex; gap: 8px; margin-top: 6px; }
-    .btn-delete-bank { flex: 1; padding: 8px; border-radius: 14px; cursor: pointer; background: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%); color: #c0392b; font-size: 0.7rem; font-weight: 600; }
+    .btn-delete-bank { flex: 1; padding: 8px; border-radius: 14px; cursor: pointer; background: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%); color: #c0392b; font-size: 0.7rem; font-weight: 600; border: none; }
     .transaction-item {
       display: flex; align-items: center; padding: 10px 14px; border-radius: 18px;
       background: linear-gradient(180deg, #e4e4e4 0%, #d0d0d0 100%);
       box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.5);
       gap: 8px;
+      transition: opacity 0.2s, box-shadow 0.2s;
     }
+    .transaction-item.dragging { opacity: 0.4; cursor: grabbing; }
+    .transaction-item.drag-over { box-shadow: 0 0 0 2px #5b8c7e, inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px rgba(255,255,255,0.5); }
     .transaction-item.income-item { border-left: 4px solid #4caf50; }
     .transaction-item.expense-item { border-left: 4px solid #e07b7b; }
-    .bill-handle { cursor: grab; font-size: 1rem; opacity: 0.3; padding: 0 4px; flex-shrink: 0; }
+    .bill-handle { cursor: grab; font-size: 1rem; opacity: 0.3; padding: 0 4px; flex-shrink: 0; touch-action: none; }
     .transaction-info { flex: 1; }
     .transaction-name { font-weight: 700; font-size: 0.8rem; }
     .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.6rem; font-weight: 600; }
@@ -190,7 +193,7 @@
     .icon-del::before, .icon-del::after { content: ""; position: absolute; top: 50%; left: 50%; width: 1.5px; height: 10px; background: #a0a0a0; }
     .icon-del::before { transform: translate(-50%, -50%) rotate(45deg); }
     .icon-del::after { transform: translate(-50%, -50%) rotate(-45deg); }
-    .add-transaction-btn { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px; border-radius: 14px; cursor: pointer; font-size: 0.75rem; background: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%); flex: 2; }
+    .add-transaction-btn { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px; border-radius: 14px; cursor: pointer; font-size: 0.75rem; background: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%); flex: 2; border: none; }
     .empty-hint { text-align: center; font-size: 0.7rem; opacity: 0.45; padding: 10px 0; }
     .empty-state { text-align: center; padding: 24px; }
     .empty-state-icon { font-size: 2.5rem; opacity: 0.4; }
@@ -237,7 +240,7 @@
 </div>
 <script>
   (function(){
-    const STORAGE_KEY='ledger_fusion_v15', RATE_KEY='ledger_exchange_rate';
+    const STORAGE_KEY='ledger_fusion_v16', RATE_KEY='ledger_exchange_rate';
     let currentRate=3.0975, data={banks:[], transactions:[]}, nextBankId=1, nextTransactionId=1, expandedBanks={}, editingTransactionId=null, editingBankId=null, currentBankId=null;
     const listEl=document.getElementById('list'), toastEl=document.getElementById('toast'), rateInput=document.getElementById('exchangeRateInput');
     const totalIncomeEl=document.getElementById('totalIncome'), totalIncomeCountEl=document.getElementById('totalIncomeCount'), totalExpenseEl=document.getElementById('totalExpense'), totalExpenseCountEl=document.getElementById('totalExpenseCount'), pendingIncomeEl=document.getElementById('pendingIncome'), pendingIncomeCountEl=document.getElementById('pendingIncomeCount'), pendingExpenseEl=document.getElementById('pendingExpense'), pendingExpenseCountEl=document.getElementById('pendingExpenseCount'), netBalanceEl=document.getElementById('netBalanceDisplay');
@@ -245,6 +248,196 @@
     const transactionFormOverlay=document.getElementById('transactionFormOverlay'), transactionFormTitle=document.getElementById('transactionFormTitle'), transactionNameInput=document.getElementById('transactionNameInput'), transactionAmountInput=document.getElementById('transactionAmountInput'), transactionCurrency=document.getElementById('transactionCurrency'), transactionType=document.getElementById('transactionType'), transactionStatusEl=document.getElementById('transactionStatus'), transactionSaveBtn=document.getElementById('transactionSaveBtn'), transactionCancelBtn=document.getElementById('transactionCancelBtn');
     const modalOverlay=document.getElementById('modalOverlay'), modalMessage=document.getElementById('modalMessage'), modalConfirm=document.getElementById('modalConfirm'), modalCancel=document.getElementById('modalCancel'), clearConfirmOverlay=document.getElementById('clearConfirmOverlay'), clearConfirmInput=document.getElementById('clearConfirmInput'), clearConfirmCancel=document.getElementById('clearConfirmCancel'), clearConfirmOk=document.getElementById('clearConfirmOk'), menuOverlay=document.getElementById('menuOverlay'), menuBtn=document.getElementById('menuBtn'), menuCloseBtn=document.getElementById('menuCloseBtn'), importFile=document.getElementById('importFile'), exportNotesBtn=document.getElementById('exportNotesBtn'), exportNotesOverlay=document.getElementById('exportNotesOverlay'), notesPreview=document.getElementById('notesPreview'), copyNotesBtn=document.getElementById('copyNotesBtn'), downloadNotesBtn=document.getElementById('downloadNotesBtn'), closeNotesBtn=document.getElementById('closeNotesBtn'), installBtn=document.getElementById('installAppBtn'), rateEditIcon=document.getElementById('rateEditIcon');
     let toastTimer, modalResolve=null;
+    
+    // ======================= 拖拽系统（完美版） =======================
+    let dragState = {
+        isDragging: false,
+        dragType: null, // 'bank' 或 'transaction'
+        dragElement: null,
+        dragId: null,
+        dragBankId: null,
+        startX: 0, startY: 0,
+        hasMoved: false,
+        targetElement: null,
+        targetId: null,
+        targetBankId: null
+    };
+    
+    function initDragAndDrop() {
+        // 绑定分类拖拽手柄
+        document.querySelectorAll('.bank-handle').forEach(handle => {
+            handle.removeEventListener('touchstart', onDragStart);
+            handle.removeEventListener('mousedown', onDragStart);
+            handle.addEventListener('touchstart', onDragStart, { passive: false });
+            handle.addEventListener('mousedown', onDragStart);
+        });
+        // 绑定记录拖拽手柄
+        document.querySelectorAll('.bill-handle').forEach(handle => {
+            handle.removeEventListener('touchstart', onDragStart);
+            handle.removeEventListener('mousedown', onDragStart);
+            handle.addEventListener('touchstart', onDragStart, { passive: false });
+            handle.addEventListener('mousedown', onDragStart);
+        });
+    }
+    
+    function onDragStart(e) {
+        e.preventDefault();
+        const handle = e.target.closest('[class*="handle"]');
+        if (!handle) return;
+        
+        if (handle.classList.contains('bank-handle')) {
+            dragState.dragType = 'bank';
+            dragState.dragId = handle.closest('.bank-group').dataset.bankId;
+            dragState.dragElement = handle.closest('.bank-group');
+        } else if (handle.classList.contains('bill-handle')) {
+            dragState.dragType = 'transaction';
+            dragState.dragId = handle.closest('.transaction-item').dataset.transactionId;
+            dragState.dragBankId = handle.closest('.bank-group').dataset.bankId;
+            dragState.dragElement = handle.closest('.transaction-item');
+        }
+        
+        if (!dragState.dragElement) return;
+        
+        dragState.startX = e.touches ? e.touches[0].clientX : e.clientX;
+        dragState.startY = e.touches ? e.touches[0].clientY : e.clientY;
+        dragState.hasMoved = false;
+        dragState.isDragging = true;
+        dragState.dragElement.classList.add('dragging');
+        dragState.dragElement.style.position = 'relative';
+        dragState.dragElement.style.zIndex = '100';
+        
+        if (e.type === 'touchstart') {
+            document.addEventListener('touchmove', onDragMove);
+            document.addEventListener('touchend', onDragEnd);
+        } else {
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+        }
+    }
+    
+    function onDragMove(e) {
+        if (!dragState.isDragging) return;
+        e.preventDefault();
+        
+        const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+        const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+        const deltaX = Math.abs(currentX - dragState.startX);
+        const deltaY = Math.abs(currentY - dragState.startY);
+        
+        if (!dragState.hasMoved && (deltaX > 5 || deltaY > 5)) {
+            dragState.hasMoved = true;
+        }
+        
+        if (!dragState.hasMoved) return;
+        
+        if (dragState.dragElement) {
+            dragState.dragElement.style.transform = `translateY(${currentY - dragState.startY}px)`;
+            dragState.dragElement.style.transition = 'none';
+        }
+        
+        const elemUnderCursor = document.elementsFromPoint(currentX, currentY);
+        let target = null;
+        
+        for (let el of elemUnderCursor) {
+            if (dragState.dragType === 'bank' && el.classList && el.classList.contains('bank-group') && el !== dragState.dragElement) {
+                target = el;
+                break;
+            }
+            if (dragState.dragType === 'transaction' && el.classList && el.classList.contains('transaction-item') && el !== dragState.dragElement) {
+                if (el.closest('.bank-group').dataset.bankId === dragState.dragBankId) {
+                    target = el;
+                    break;
+                }
+            }
+        }
+        
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        if (target) {
+            target.classList.add('drag-over');
+            dragState.targetElement = target;
+            if (dragState.dragType === 'bank') {
+                dragState.targetId = target.dataset.bankId;
+            } else {
+                dragState.targetId = target.dataset.transactionId;
+                dragState.targetBankId = target.closest('.bank-group').dataset.bankId;
+            }
+        } else {
+            dragState.targetElement = null;
+            dragState.targetId = null;
+            dragState.targetBankId = null;
+        }
+    }
+    
+    function onDragEnd(e) {
+        if (!dragState.isDragging) return;
+        
+        if (dragState.dragElement) {
+            dragState.dragElement.style.transform = '';
+            dragState.dragElement.style.transition = '';
+            dragState.dragElement.style.position = '';
+            dragState.dragElement.style.zIndex = '';
+            dragState.dragElement.classList.remove('dragging');
+        }
+        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        
+        if (dragState.hasMoved && dragState.targetElement && dragState.targetId) {
+            if (dragState.dragType === 'bank') {
+                const banks = [...data.banks];
+                const fromIdx = banks.findIndex(b => b.id == dragState.dragId);
+                const toIdx = banks.findIndex(b => b.id == dragState.targetId);
+                if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
+                    const [moved] = banks.splice(fromIdx, 1);
+                    banks.splice(toIdx, 0, moved);
+                    data.banks = banks;
+                    saveData();
+                    render();
+                    showToast('分类顺序已更新');
+                }
+            } else if (dragState.dragType === 'transaction') {
+                if (dragState.dragBankId === dragState.targetBankId) {
+                    const bankId = parseInt(dragState.dragBankId);
+                    const bank = data.banks.find(b => b.id === bankId);
+                    if (bank) {
+                        const transactions = data.transactions.filter(t => t.bankId === bankId);
+                        const fromIdx = transactions.findIndex(t => t.id == dragState.dragId);
+                        const toIdx = transactions.findIndex(t => t.id == dragState.targetId);
+                        if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
+                            const allTransactions = [...data.transactions];
+                            const fromGlobalIdx = allTransactions.findIndex(t => t.id == dragState.dragId);
+                            const toGlobalIdx = allTransactions.findIndex(t => t.id == dragState.targetId);
+                            if (fromGlobalIdx !== -1 && toGlobalIdx !== -1) {
+                                const [moved] = allTransactions.splice(fromGlobalIdx, 1);
+                                allTransactions.splice(toGlobalIdx, 0, moved);
+                                data.transactions = allTransactions;
+                                saveData();
+                                render();
+                                showToast('记录顺序已更新');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        dragState = {
+            isDragging: false,
+            dragType: null,
+            dragElement: null,
+            dragId: null,
+            dragBankId: null,
+            startX: 0, startY: 0,
+            hasMoved: false,
+            targetElement: null,
+            targetId: null,
+            targetBankId: null
+        };
+        
+        document.removeEventListener('touchmove', onDragMove);
+        document.removeEventListener('touchend', onDragEnd);
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('mouseup', onDragEnd);
+    }
+    
     function showToast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1800); }
     function showModal(message,options={}){ return new Promise(resolve=>{ modalResolve=resolve; modalMessage.textContent=message; document.getElementById('modalIcon').textContent=options.icon||'⚠️'; modalConfirm.className='btn confirm-btn'+(options.confirmClass?' '+options.confirmClass:' confirm-danger'); modalConfirm.textContent=options.confirmText||'确认'; modalCancel.textContent=options.cancelText||'取消'; modalCancel.style.display=options.showCancel===false?'none':''; modalOverlay.classList.add('show'); }); }
     function hideModal(result){ modalOverlay.classList.remove('show'); if(modalResolve){ modalResolve(result); modalResolve=null; } }
@@ -266,8 +459,6 @@
         const bankTransactions=getBankTransactions(bank.id);
         let paidInc=0,unpaidInc=0,paidExp=0,unpaidExp=0,paidIncC=0,unpaidIncC=0,paidExpC=0,unpaidExpC=0;
         bankTransactions.forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income'){ if(t.status==='paid'){ paidInc+=amt; paidIncC++; }else{ unpaidInc+=amt; unpaidIncC++; } }else{ if(t.status==='paid'){ paidExp+=amt; paidExpC++; }else{ unpaidExp+=amt; unpaidExpC++; } } });
-       // const bankNet=(paidInc-unpaidInc)-(paidExp-unpaidExp);
-        // 构建智能状态栏：仅显示有数据的统计项
         let statusHtml='<div class="bank-status-stats">';
         if(paidIncC>0) statusHtml+=`<span class="stat-item stat-paid-income">✅已收入 ${paidIncC} 笔 RM${paidInc.toFixed(2)}</span>`;
         if(unpaidIncC>0) statusHtml+=`<span class="stat-item stat-unpaid-income">⏳待收入 ${unpaidIncC} 笔 RM${unpaidInc.toFixed(2)}</span>`;
@@ -277,7 +468,8 @@
         statusHtml+='</div>';
         const isExpanded=expandedBanks[bank.id]!==false;
         const groupDiv=document.createElement('div'); groupDiv.className='bank-group'+(isExpanded?' expanded':''); groupDiv.dataset.bankId=bank.id;
-        let transactionsHtml=''; bankTransactions.forEach(t=>{ const isIncome=t.type==='income', isPaid=t.status==='paid'; const currencyDisplay=t.originalCurrency==='SGD'?`SGD ${t.originalAmount.toFixed(2)} → `:''; const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付'); const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense'); transactionsHtml+=`<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div><span class="status-badge ${statusClass}">${statusLabel}</span></div><div class="transaction-meta">${currencyDisplay}MYR ${parseFloat(t.amountMYR).toFixed(2)}</div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; });
+        let transactionsHtml=''; 
+        bankTransactions.forEach(t=>{ const isIncome=t.type==='income', isPaid=t.status==='paid'; const currencyDisplay=t.originalCurrency==='SGD'?`SGD ${t.originalAmount.toFixed(2)} → `:''; const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付'); const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense'); transactionsHtml+=`<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div><span class="status-badge ${statusClass}">${statusLabel}</span></div><div class="transaction-meta">${currencyDisplay}MYR ${parseFloat(t.amountMYR).toFixed(2)}</div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; });
         if(bankTransactions.length===0) transactionsHtml+='<div class="empty-hint">暂无记录</div>';
         transactionsHtml+=`<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">🗑 删除分类</button></div>`;
         groupDiv.innerHTML=`<div class="bank-header"><div class="bank-header-main"><span class="bank-handle">⋮⋮</span><span class="bank-icon">📁</span><div class="bank-header-info"><div><span class="bank-name">${escapeHtml(bank.name)}</span></div>${statusHtml}</div></div><div class="bank-header-actions"><span class="edit-bank-icon" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">✏️</span><span class="collapse-icon">▼</span></div></div><div class="bank-body"><div class="bank-items">${transactionsHtml}</div></div>`;
@@ -291,6 +483,7 @@
       document.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; const count=getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{icon:'🗑️',confirmText:'确认删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.banks=data.banks.filter(b=>b.id!==bankId); data.transactions=data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); } }); }; });
       document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }; });
       updateSummary();
+      initDragAndDrop();
     }
     function openBankForm(){ bankFormTitle.textContent='添加分类'; editingBankId=null; bankNameInput.value=''; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }
     function closeBankForm(){ bankFormOverlay.classList.remove('show'); editingBankId=null; }
