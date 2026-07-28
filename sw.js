@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ledger-pwa-v8'; // ⚠️ 每次发布新版本，一定要把这个版本号加一，否则浏览器不会发现sw.js变了，也就不会更新缓存
+const CACHE_NAME = 'ledger-pwa-v9'; // ⚠️ 每次发布新版本，一定要把这个版本号加一，否则浏览器不会发现sw.js变了，也就不会更新缓存
 
 const urlsToCache = [
   './',
