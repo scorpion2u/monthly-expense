@@ -33,6 +33,10 @@
       align-items: flex-start;
       min-height: 100dvh;
       padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      padding-left: calc(16px + env(safe-area-inset-left));
+      padding-right: calc(16px + env(safe-area-inset-right));
       margin: 0;
     }
     .app {
@@ -212,7 +216,7 @@
     .row-buttons { display: flex; gap: 10px; margin-top: 10px; }
     .row-buttons .btn { flex: 1; margin: 0; }
     .menu-popup .btn { margin: 0; justify-content: center; }
-    .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); padding: 12px 28px; border-radius: 28px; background: #5a5a5a; color: #eee; font-size: 0.85rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 500; }
+    .toast { position: fixed; top: calc(24px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); padding: 12px 28px; border-radius: 28px; background: #5a5a5a; color: #eee; font-size: 0.85rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 500; }
     .toast.show { opacity: 1; }
     .export-preview { background: #e8e8e8; border-radius: 16px; padding: 14px; max-height: 320px; overflow-y: auto; font-size: 0.72rem; white-space: pre-wrap; font-family: monospace; }
     .danger-input input { background: #fff0f0; border: 1px solid #e07b7b; margin-top: 8px; }
@@ -221,14 +225,14 @@
 </head>
 <body>
 <div class="app">
-  <div class="title-card"><div class="title-left"><span class="app-icon">📒</span><span class="app-title">帐目记录</span></div><div class="title-actions"><button class="header-btn" id="addBankBtn">➕</button><button class="header-btn" id="menuBtn">☰</button></div></div>
+  <div class="title-card"><div class="title-left"><span class="app-icon">📒</span><span class="app-title">帐目记录</span></div><div class="title-actions"><button class="header-btn" id="addBankBtn" aria-label="添加分类">➕</button><button class="header-btn" id="menuBtn" aria-label="打开菜单">☰</button></div></div>
   <div class="summary-section">
     <div class="summary-row"><div class="summary-card income-card"><div class="summary-label"><span class="summary-dot green"></span>总收入</div><div class="summary-amount" id="totalIncome">RM 0.00</div><div class="summary-count" id="totalIncomeCount">0 笔</div></div><div class="summary-card expense-card"><div class="summary-label"><span class="summary-dot red"></span>总支付</div><div class="summary-amount" id="totalExpense">RM 0.00</div><div class="summary-count" id="totalExpenseCount">0 笔</div></div></div>
     <div class="summary-row"><div class="summary-card pending-income-card"><div class="summary-label"><span class="summary-dot orange"></span>待收入</div><div class="summary-amount" id="pendingIncome">RM 0.00</div><div class="summary-count" id="pendingIncomeCount">0 笔</div></div><div class="summary-card pending-expense-card"><div class="summary-label"><span class="summary-dot deeppurple"></span>待支付</div><div class="summary-amount" id="pendingExpense">RM 0.00</div><div class="summary-count" id="pendingExpenseCount">0 笔</div></div></div>
     <div class="summary-card net-card"><div class="summary-label"><span class="summary-dot blue"></span>结余（已收入 − 已支付）</div><div class="summary-amount" id="netBalanceDisplay">RM 0.00</div></div>
   </div>
-  <div class="rate-box"><span id="rateMonthLabel">🇸🇬 1 SGD = </span><input type="number" id="exchangeRateInput" step="0.0001" min="0.1" value="3.0975"><span> MYR</span><span class="rate-edit-icon" id="rateEditIcon">✏️</span></div>
-  <div class="rate-box month-filter-box"><span>📅</span><select id="monthFilterSelect" style="width:auto;flex:1;margin-left:10px;"><option value="all">全部记录</option></select><button class="header-btn" id="addMonthBtn" style="margin-left:8px;width:32px;height:32px;font-size:0.95rem;flex-shrink:0;" title="新增月份">➕</button><button class="header-btn" id="copyMonthBtn" style="margin-left:6px;width:32px;height:32px;font-size:0.95rem;flex-shrink:0;" title="复制分类和记录到其他月份">📋</button><button class="header-btn" id="deleteMonthBtn" style="margin-left:6px;width:32px;height:32px;font-size:0.95rem;flex-shrink:0;color:#c0392b;" title="删除当前月份记录">🗑️</button></div>
+  <div class="rate-box"><span id="rateMonthLabel">🇸🇬 1 SGD = </span><input type="number" id="exchangeRateInput" step="0.0001" min="0.1" value="3.0975" aria-label="新币兑马币汇率"><span> MYR</span><span class="rate-edit-icon" id="rateEditIcon" role="button" tabindex="0" aria-label="编辑汇率">✏️</span></div>
+  <div class="rate-box month-filter-box"><span>📅</span><select id="monthFilterSelect" style="width:auto;flex:1;margin-left:10px;" aria-label="选择月份"><option value="all">全部记录</option></select><button class="header-btn" id="addMonthBtn" style="margin-left:8px;width:32px;height:32px;font-size:0.95rem;flex-shrink:0;" title="新增月份" aria-label="新增月份">➕</button><button class="header-btn" id="copyMonthBtn" style="margin-left:6px;width:32px;height:32px;font-size:0.95rem;flex-shrink:0;" title="复制分类和记录到其他月份" aria-label="复制分类和记录到其他月份">📋</button><button class="header-btn" id="deleteMonthBtn" style="margin-left:6px;width:32px;height:32px;font-size:0.95rem;flex-shrink:0;color:#c0392b;" title="删除当前月份记录" aria-label="删除当前月份记录">🗑️</button></div>
   <div id="list" class="list"></div>
   <div class="menu-overlay" id="menuOverlay"><div class="menu-popup"><button class="btn install-menu-btn" id="installAppBtn" style="display:none;">📱 安装应用</button><button class="btn" id="exportNotesBtn">📝 导出笔记</button><button class="btn" id="exportBtn">📤 导出数据</button><button class="btn" id="importBtn">📥 导入数据</button><button class="btn confirm-danger" id="clearAllBtn">⚠️ 清空所有数据</button><button class="btn" id="toggleAllStatusUnpaidBtn" style="color:#e67e22;">🔴 恢复到未收入与未支出</button><button class="btn" id="toggleAllStatusPaidBtn" style="color:#2c7a4a;">🟢 恢复到已收入与已支出</button><button class="btn" id="menuCloseBtn">关闭</button></div></div>
   <input type="file" id="importFile" accept=".json" style="display:none;">
@@ -251,6 +255,11 @@
     const transactionFormOverlay=document.getElementById('transactionFormOverlay'), transactionFormTitle=document.getElementById('transactionFormTitle'), transactionNameInput=document.getElementById('transactionNameInput'), transactionAmountInput=document.getElementById('transactionAmountInput'), transactionCurrency=document.getElementById('transactionCurrency'), transactionType=document.getElementById('transactionType'), transactionStatusEl=document.getElementById('transactionStatus'), transactionDateInput=document.getElementById('transactionDateInput'), transactionSaveBtn=document.getElementById('transactionSaveBtn'), transactionCancelBtn=document.getElementById('transactionCancelBtn');
     const modalOverlay=document.getElementById('modalOverlay'), modalMessage=document.getElementById('modalMessage'), modalConfirm=document.getElementById('modalConfirm'), modalCancel=document.getElementById('modalCancel'), clearConfirmOverlay=document.getElementById('clearConfirmOverlay'), clearConfirmInput=document.getElementById('clearConfirmInput'), clearConfirmCancel=document.getElementById('clearConfirmCancel'), clearConfirmOk=document.getElementById('clearConfirmOk'), menuOverlay=document.getElementById('menuOverlay'), menuBtn=document.getElementById('menuBtn'), menuCloseBtn=document.getElementById('menuCloseBtn'), importFile=document.getElementById('importFile'), exportNotesBtn=document.getElementById('exportNotesBtn'), exportNotesOverlay=document.getElementById('exportNotesOverlay'), notesPreview=document.getElementById('notesPreview'), copyNotesBtn=document.getElementById('copyNotesBtn'), downloadNotesBtn=document.getElementById('downloadNotesBtn'), closeNotesBtn=document.getElementById('closeNotesBtn'), installBtn=document.getElementById('installAppBtn'), rateEditIcon=document.getElementById('rateEditIcon');
     let toastTimer, modalResolve=null;
+    // 让 role="button" 的 span/div 也能用 Enter / 空格键触发（用于点击后不必再切回鼠标操作）
+    function bindActivate(el, handler){
+      el.onclick = handler;
+      el.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); handler(e); } };
+    }
     
     // 智能排序：将记录移动到同分类的底部或顶部
     function moveTransactionToBottom(tid, bankId) {
@@ -496,7 +505,7 @@
     function setRateForMonth(month,rate){ if(!data.rates) data.rates={}; data.rates[month]=rate; }
     function getVisibleBanks(){ return currentMonthFilter==='all' ? data.banks : data.banks.filter(b=>b.month===currentMonthFilter); }
     function normalizeData(d){ if(!d.banks)d.banks=[]; if(!d.transactions)d.transactions=[]; if(!d.rates)d.rates={}; if(!d.months)d.months=[]; d.transactions.forEach(t=>{ if(!t.type)t.type='expense'; if(!t.status)t.status='unpaid'; if(!t.originalCurrency){ t.originalCurrency='MYR'; t.originalAmount=t.amountMYR; } if(t.originalAmount===undefined)t.originalAmount=t.amountMYR; }); d.banks.forEach(b=>{ if(!b.month){ const bankDates=d.transactions.filter(t=>t.bankId===b.id).map(t=>t.date).filter(Boolean).sort(); b.month=bankDates.length?bankDates[0].slice(0,7):todayStr().slice(0,7); } if(!d.months.includes(b.month)) d.months.push(b.month); }); return d; }
-    function loadData(){ const legacyRate=parseFloat(localStorage.getItem(RATE_KEY)); if(!isNaN(legacyRate)&&legacyRate>0) DEFAULT_RATE=legacyRate; const saved=localStorage.getItem(STORAGE_KEY); if(saved){ try{ data=JSON.parse(saved); data=normalizeData(data); }catch(e){ data={banks:[],transactions:[],rates:{},months:[]}; } }else data={banks:[],transactions:[],rates:{},months:[]}; nextBankId=Math.max(0,...data.banks.map(b=>b.id))+1; nextTransactionId=Math.max(0,...data.transactions.map(t=>t.id))+1; expandedBanks={}; }
+    function loadData(){ const legacyRate=parseFloat(localStorage.getItem(RATE_KEY)); if(!isNaN(legacyRate)&&legacyRate>0) DEFAULT_RATE=legacyRate; const saved=localStorage.getItem(STORAGE_KEY); if(saved){ try{ data=JSON.parse(saved); data=normalizeData(data); }catch(e){ data={banks:[],transactions:[],rates:{},months:[]}; } }else data={banks:[],transactions:[],rates:{},months:[]}; nextBankId=data.banks.reduce((max,b)=>Math.max(max,b.id),0)+1; nextTransactionId=data.transactions.reduce((max,t)=>Math.max(max,t.id),0)+1; expandedBanks={}; }
     function saveData(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }
     function saveExpandedState(){ localStorage.setItem('expandedBanks_fusion',JSON.stringify(expandedBanks)); }
     function populateMonthFilterOptions(){
@@ -538,10 +547,10 @@
         const isExpanded=expandedBanks[bank.id]===true;
         const groupDiv=document.createElement('div'); groupDiv.className='bank-group'+(isExpanded?' expanded':''); groupDiv.dataset.bankId=bank.id;
         let transactionsHtml=''; 
-        bankTransactions.forEach(t=>{ const isIncome=t.type==='income', isPaid=t.status==='paid'; const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付'); const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense'); transactionsHtml+=`<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div><span class="status-badge ${statusClass}">${statusLabel}</span></div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}"><div class="icon-del"></div></button></div></div>`; });
+        bankTransactions.forEach(t=>{ const isIncome=t.type==='income', isPaid=t.status==='paid'; const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付'); const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense'); transactionsHtml+=`<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle" aria-hidden="true">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div><span class="status-badge ${statusClass}">${statusLabel}</span></div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}" aria-label="${isPaid?'标记为未'+(isIncome?'收入':'支付'):'标记为已'+(isIncome?'收入':'支付')}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}" aria-label="编辑记录"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}" aria-label="删除记录"><div class="icon-del"></div></button></div></div>`; });
         if(bankTransactions.length===0) transactionsHtml+='<div class="empty-hint">暂无记录</div>';
-        transactionsHtml+=`<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">🗑 删除分类</button></div>`;
-        groupDiv.innerHTML=`<div class="bank-header"><div class="bank-header-main"><span class="bank-handle">⋮⋮</span><span class="bank-icon">📁</span><div class="bank-header-info"><div><span class="bank-name">${escapeHtml(bank.name)}</span></div>${statusHtml}</div></div><div class="bank-header-actions"><span class="edit-bank-icon" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}">✏️</span><span class="collapse-icon">▼</span></div></div><div class="bank-body"><div class="bank-items">${transactionsHtml}</div></div>`;
+        transactionsHtml+=`<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}" role="button" tabindex="0" aria-label="添加记录">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}" aria-label="删除「${escapeHtml(bank.name)}」分类">🗑 删除分类</button></div>`;
+        groupDiv.innerHTML=`<div class="bank-header"><div class="bank-header-main"><span class="bank-handle" aria-hidden="true">⋮⋮</span><span class="bank-icon">📁</span><div class="bank-header-info"><div><span class="bank-name">${escapeHtml(bank.name)}</span></div>${statusHtml}</div></div><div class="bank-header-actions"><span class="edit-bank-icon" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}" role="button" tabindex="0" aria-label="编辑「${escapeHtml(bank.name)}」分类名称">✏️</span><span class="collapse-icon" aria-hidden="true">▼</span></div></div><div class="bank-body"><div class="bank-items">${transactionsHtml}</div></div>`;
         const headerEl=groupDiv.querySelector('.bank-header'); headerEl.onclick=e=>{ if(e.target.closest('.bank-handle')||e.target.closest('.edit-bank-icon')) return; expandedBanks[bank.id]=!expandedBanks[bank.id]; saveExpandedState(); render(); };
         listEl.appendChild(groupDiv);
       });
@@ -574,9 +583,9 @@
       
       document.querySelectorAll('.edit-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ const bank=data.banks.find(b=>b.id===t.bankId); editingTransactionId=tid; transactionNameInput.value=t.name; transactionAmountInput.value=t.originalAmount; transactionCurrency.value=t.originalCurrency||'MYR'; transactionType.value=t.type||'expense'; transactionStatusEl.value=t.status||'unpaid'; setDateRangeForBank(bank); transactionDateInput.value=t.date||todayStr(); openTransactionForm(t.bankId); } }; });
       document.querySelectorAll('.del-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.transactions=data.transactions.filter(x=>x.id!==tid); saveData(); showToast('已删除'); render(); } }); } }; });
-      document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; transactionCurrency.value='MYR'; transactionType.value='expense'; transactionStatusEl.value='unpaid'; transactionDateInput.value=todayStr(); openTransactionForm(bankId); }; });
+      document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; transactionCurrency.value='MYR'; transactionType.value='expense'; transactionStatusEl.value='unpaid'; transactionDateInput.value=todayStr(); openTransactionForm(bankId); }); });
       document.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; const count=getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{icon:'🗑️',confirmText:'确认删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.banks=data.banks.filter(b=>b.id!==bankId); data.transactions=data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); } }); }; });
-      document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }; });
+      document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }); });
       updateSummary();
       initDragAndDrop();
     }
@@ -646,7 +655,74 @@
         showModal(formatMonthLabel(targetMonth)+' 已有 '+existing.length+' 个分类，复制会在此基础上追加，是否继续？',{icon:'📋',confirmText:'继续复制',confirmClass:'confirm-safe'}).then(ok=>{ if(ok) doCopy(); });
       } else doCopy();
     }
-    function initEventListeners(){ monthFilterSelect.onchange=()=>{ currentMonthFilter=monthFilterSelect.value; render(); }; rateEditIcon.onclick=()=>{ rateInput.focus(); rateInput.select(); }; rateInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); applyExchangeRate(); rateInput.blur(); } }); rateInput.addEventListener('blur',applyExchangeRate); rateInput.addEventListener('change',applyExchangeRate); menuBtn.onclick=()=>menuOverlay.classList.add('show'); menuCloseBtn.onclick=()=>menuOverlay.classList.remove('show'); menuOverlay.addEventListener('click',e=>{ if(e.target===menuOverlay) menuOverlay.classList.remove('show'); }); document.getElementById('exportBtn').onclick=()=>{ menuOverlay.classList.remove('show'); const jsonStr=JSON.stringify(data,null,2); const blob=new Blob([jsonStr],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='ledger-'+new Date().toISOString().split('T')[0]+'.json'; a.click(); URL.revokeObjectURL(url); showToast('导出成功'); }; document.getElementById('importBtn').onclick=()=>{ menuOverlay.classList.remove('show'); importFile.click(); }; importFile.onchange=function(e){ const f=e.target.files[0]; if(!f)return; const reader=new FileReader(); reader.onload=function(ev){ try{ let nd=JSON.parse(ev.target.result); if(!nd.banks||!nd.transactions) throw new Error('格式错误'); nd=normalizeData(nd); showModal('导入 '+nd.banks.length+' 分类 '+nd.transactions.length+' 条记录？',{icon:'📥',confirmText:'导入',confirmClass:'confirm-safe'}).then(ok=>{ if(!ok){ importFile.value=''; return; } data=nd; expandedBanks={}; nextBankId=1; nextTransactionId=1; data.banks.forEach(b=>{ if(b.id>=nextBankId) nextBankId=b.id+1; expandedBanks[b.id]=true; }); data.transactions.forEach(t=>{ if(t.id>=nextTransactionId) nextTransactionId=t.id+1; }); saveExpandedState(); saveData(); showToast('导入成功'); importFile.value=''; render(); }); }catch(err){ showToast('导入失败'); importFile.value=''; } }; reader.readAsText(f); }; document.getElementById('toggleAllStatusUnpaidBtn').onclick=()=>{ menuOverlay.classList.remove('show'); setAllStatusToUnpaid(); }; document.getElementById('toggleAllStatusPaidBtn').onclick=()=>{ menuOverlay.classList.remove('show'); setAllStatusToPaid(); }; document.getElementById('clearAllBtn').onclick=()=>{ menuOverlay.classList.remove('show'); if(data.banks.length===0&&data.transactions.length===0){ showToast('当前没有数据可清空'); return; } clearConfirmInput.value=''; clearConfirmOk.disabled=true; clearConfirmOverlay.classList.add('show'); setTimeout(()=>clearConfirmInput.focus(),100); }; clearConfirmCancel.onclick=()=>clearConfirmOverlay.classList.remove('show'); clearConfirmInput.oninput=function(){ clearConfirmOk.disabled=this.value!=='确认清空'; }; clearConfirmOk.onclick=function(){ if(clearConfirmInput.value==='确认清空'){ data={banks:[],transactions:[],rates:{},months:[]}; expandedBanks={}; nextBankId=1; nextTransactionId=1; saveExpandedState(); saveData(); showToast('已清空所有数据'); clearConfirmOverlay.classList.remove('show'); render(); }else showToast('输入"确认清空"才能继续'); }; clearConfirmOverlay.addEventListener('click',e=>{ if(e.target===clearConfirmOverlay) clearConfirmOverlay.classList.remove('show'); }); document.getElementById('addBankBtn').onclick=()=>openBankForm();
+    function initRateAndMonthFilterEvents(){
+      monthFilterSelect.onchange=()=>{ currentMonthFilter=monthFilterSelect.value; render(); };
+      bindActivate(rateEditIcon, ()=>{ rateInput.focus(); rateInput.select(); });
+      rateInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); applyExchangeRate(); rateInput.blur(); } });
+      rateInput.addEventListener('blur',applyExchangeRate);
+      rateInput.addEventListener('change',applyExchangeRate);
+    }
+
+    function initMenuEvents(){
+      menuBtn.onclick=()=>menuOverlay.classList.add('show');
+      menuCloseBtn.onclick=()=>menuOverlay.classList.remove('show');
+      menuOverlay.addEventListener('click',e=>{ if(e.target===menuOverlay) menuOverlay.classList.remove('show'); });
+
+      document.getElementById('exportBtn').onclick=()=>{
+        menuOverlay.classList.remove('show');
+        const jsonStr=JSON.stringify(data,null,2);
+        const blob=new Blob([jsonStr],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download='ledger-'+new Date().toISOString().split('T')[0]+'.json'; a.click();
+        URL.revokeObjectURL(url);
+        showToast('导出成功');
+      };
+
+      document.getElementById('importBtn').onclick=()=>{ menuOverlay.classList.remove('show'); importFile.click(); };
+      importFile.onchange=function(e){
+        const f=e.target.files[0]; if(!f)return;
+        const reader=new FileReader();
+        reader.onload=function(ev){
+          try{
+            let nd=JSON.parse(ev.target.result);
+            if(!nd.banks||!nd.transactions) throw new Error('格式错误');
+            nd=normalizeData(nd);
+            showModal('导入 '+nd.banks.length+' 分类 '+nd.transactions.length+' 条记录？',{icon:'📥',confirmText:'导入',confirmClass:'confirm-safe'}).then(ok=>{
+              if(!ok){ importFile.value=''; return; }
+              data=nd; expandedBanks={}; nextBankId=1; nextTransactionId=1;
+              data.banks.forEach(b=>{ if(b.id>=nextBankId) nextBankId=b.id+1; expandedBanks[b.id]=true; });
+              data.transactions.forEach(t=>{ if(t.id>=nextTransactionId) nextTransactionId=t.id+1; });
+              saveExpandedState(); saveData(); showToast('导入成功'); importFile.value=''; render();
+            });
+          }catch(err){ showToast('导入失败'); importFile.value=''; }
+        };
+        reader.readAsText(f);
+      };
+
+      document.getElementById('toggleAllStatusUnpaidBtn').onclick=()=>{ menuOverlay.classList.remove('show'); setAllStatusToUnpaid(); };
+      document.getElementById('toggleAllStatusPaidBtn').onclick=()=>{ menuOverlay.classList.remove('show'); setAllStatusToPaid(); };
+
+      document.getElementById('clearAllBtn').onclick=()=>{
+        menuOverlay.classList.remove('show');
+        if(data.banks.length===0&&data.transactions.length===0){ showToast('当前没有数据可清空'); return; }
+        clearConfirmInput.value=''; clearConfirmOk.disabled=true; clearConfirmOverlay.classList.add('show');
+        setTimeout(()=>clearConfirmInput.focus(),100);
+      };
+      clearConfirmCancel.onclick=()=>clearConfirmOverlay.classList.remove('show');
+      clearConfirmInput.oninput=function(){ clearConfirmOk.disabled=this.value!=='确认清空'; };
+      clearConfirmOk.onclick=function(){
+        if(clearConfirmInput.value==='确认清空'){
+          data={banks:[],transactions:[],rates:{},months:[]}; expandedBanks={}; nextBankId=1; nextTransactionId=1;
+          saveExpandedState(); saveData(); showToast('已清空所有数据'); clearConfirmOverlay.classList.remove('show'); render();
+        }else showToast('输入"确认清空"才能继续');
+      };
+      clearConfirmOverlay.addEventListener('click',e=>{ if(e.target===clearConfirmOverlay) clearConfirmOverlay.classList.remove('show'); });
+
+      document.getElementById('addBankBtn').onclick=()=>openBankForm();
+    }
+
+    function initMonthEvents(){
       copyMonthBtn.onclick=()=>{
         const months=[...new Set(data.banks.map(b=>b.month))].filter(Boolean).sort().reverse();
         if(!months.length){ showToast('还没有可复制的分类'); return; }
@@ -661,12 +737,107 @@
       copyMonthCancelBtn.onclick=()=>copyMonthOverlay.classList.remove('show');
       copyMonthOverlay.addEventListener('click',e=>{ if(e.target===copyMonthOverlay) copyMonthOverlay.classList.remove('show'); });
       copyMonthConfirmBtn.onclick=()=>performCopyMonth(copySourceMonth.value,copyTargetMonth.value);
-      addMonthBtn.onclick=()=>{ const [y,m]=todayStr().slice(0,7).split('-').map(Number); const nd=new Date(y,m,1); addMonthInput.value=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0'); addMonthOverlay.classList.add('show'); };
+
+      addMonthBtn.onclick=()=>{
+        const [y,m]=todayStr().slice(0,7).split('-').map(Number);
+        const nd=new Date(y,m,1);
+        addMonthInput.value=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
+        addMonthOverlay.classList.add('show');
+      };
       addMonthCancelBtn.onclick=()=>addMonthOverlay.classList.remove('show');
       addMonthOverlay.addEventListener('click',e=>{ if(e.target===addMonthOverlay) addMonthOverlay.classList.remove('show'); });
       addMonthConfirmBtn.onclick=()=>performAddMonth(addMonthInput.value);
-      deleteMonthBtn.onclick=()=>performDeleteMonth(currentMonthFilter); exportNotesBtn.onclick=()=>{ menuOverlay.classList.remove('show'); notesPreview.textContent=generateNotes(); exportNotesOverlay.classList.add('show'); }; copyNotesBtn.onclick=()=>{ const txt=notesPreview.textContent; if(txt){ navigator.clipboard.writeText(txt).then(()=>showToast('笔记已复制')).catch(()=>{ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('已复制'); }); } }; downloadNotesBtn.onclick=()=>{ const txt=notesPreview.textContent; if(txt){ const blob=new Blob([txt],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='记账笔记_'+new Date().toISOString().slice(0,10)+'.txt'; a.click(); showToast('笔记已下载'); } }; closeNotesBtn.onclick=()=>exportNotesOverlay.classList.remove('show'); exportNotesOverlay.addEventListener('click',e=>{ if(e.target===exportNotesOverlay) exportNotesOverlay.classList.remove('show'); }); bankFormOverlay.addEventListener('click',e=>{ if(e.target===bankFormOverlay) closeBankForm(); }); bankCancelBtn.onclick=closeBankForm; bankSaveBtn.onclick=function(){ const name=bankNameInput.value.trim(); if(!name){ showToast('请输入分类名称'); return; } if(editingBankId){ const bank=data.banks.find(b=>b.id===editingBankId); if(bank) bank.name=name; }else{ data.banks.push({id:nextBankId,name,month:getWorkingMonth()}); expandedBanks[nextBankId]=true; saveExpandedState(); nextBankId++; } saveData(); editingBankId=null; closeBankForm(); showToast('分类已保存'); render(); }; transactionFormOverlay.addEventListener('click',e=>{ if(e.target===transactionFormOverlay) closeTransactionForm(); }); transactionCancelBtn.onclick=closeTransactionForm; transactionSaveBtn.onclick=function(){ const name=transactionNameInput.value.trim(); const amountRaw=transactionAmountInput.value; const currency=transactionCurrency.value; const type=transactionType.value; const status=transactionStatusEl.value; if(!name){ showToast('请输入名称'); return; } let amount=parseFloat(amountRaw); if(isNaN(amount)||amount<0){ showToast('请输入有效金额'); return; } const targetBank=data.banks.find(b=>b.id===currentBankId); const rateMonth=targetBank?targetBank.month:getWorkingMonth(); const rate=getRateForMonth(rateMonth); let amountMYR=amount; if(currency==='SGD') amountMYR=amount*rate; const finalDate=transactionDateInput.value||todayStr(); if(editingTransactionId){ const t=data.transactions.find(x=>x.id===editingTransactionId); if(t){ t.name=name; t.amountMYR=amountMYR; t.type=type; t.status=status; t.date=finalDate; t.originalCurrency=currency; t.originalAmount=amount; } }else{ data.transactions.push({id:nextTransactionId,bankId:currentBankId,name,amountMYR,type,status,date:finalDate,originalCurrency:currency,originalAmount:amount}); nextTransactionId++; } saveData(); editingTransactionId=null; currentBankId=null; closeTransactionForm(); showToast('已保存'); render(); }; }
-    let deferredPrompt; window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferredPrompt=e; installBtn.style.display='flex'; }); installBtn.addEventListener('click',async function(){ menuOverlay.classList.remove('show'); if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; }else showToast('请查看浏览器安装选项'); });
+
+      deleteMonthBtn.onclick=()=>performDeleteMonth(currentMonthFilter);
+    }
+
+    function initNotesEvents(){
+      exportNotesBtn.onclick=()=>{ menuOverlay.classList.remove('show'); notesPreview.textContent=generateNotes(); exportNotesOverlay.classList.add('show'); };
+      copyNotesBtn.onclick=()=>{
+        const txt=notesPreview.textContent;
+        if(txt){
+          navigator.clipboard.writeText(txt).then(()=>showToast('笔记已复制')).catch(()=>{
+            const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+            ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('已复制');
+          });
+        }
+      };
+      downloadNotesBtn.onclick=()=>{
+        const txt=notesPreview.textContent;
+        if(txt){
+          const blob=new Blob([txt],{type:'text/plain'});
+          const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+          a.download='记账笔记_'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
+          showToast('笔记已下载');
+        }
+      };
+      closeNotesBtn.onclick=()=>exportNotesOverlay.classList.remove('show');
+      exportNotesOverlay.addEventListener('click',e=>{ if(e.target===exportNotesOverlay) exportNotesOverlay.classList.remove('show'); });
+    }
+
+    function initFormEvents(){
+      bankFormOverlay.addEventListener('click',e=>{ if(e.target===bankFormOverlay) closeBankForm(); });
+      bankCancelBtn.onclick=closeBankForm;
+      bankSaveBtn.onclick=function(){
+        const name=bankNameInput.value.trim();
+        if(!name){ showToast('请输入分类名称'); return; }
+        if(editingBankId){
+          const bank=data.banks.find(b=>b.id===editingBankId);
+          if(bank) bank.name=name;
+        }else{
+          data.banks.push({id:nextBankId,name,month:getWorkingMonth()});
+          expandedBanks[nextBankId]=true; saveExpandedState(); nextBankId++;
+        }
+        saveData(); editingBankId=null; closeBankForm(); showToast('分类已保存'); render();
+      };
+
+      transactionFormOverlay.addEventListener('click',e=>{ if(e.target===transactionFormOverlay) closeTransactionForm(); });
+      transactionCancelBtn.onclick=closeTransactionForm;
+      transactionSaveBtn.onclick=function(){
+        const name=transactionNameInput.value.trim();
+        const amountRaw=transactionAmountInput.value;
+        const currency=transactionCurrency.value;
+        const type=transactionType.value;
+        const status=transactionStatusEl.value;
+        if(!name){ showToast('请输入名称'); return; }
+        let amount=parseFloat(amountRaw);
+        if(isNaN(amount)||amount<0){ showToast('请输入有效金额'); return; }
+        const targetBank=data.banks.find(b=>b.id===currentBankId);
+        const rateMonth=targetBank?targetBank.month:getWorkingMonth();
+        const rate=getRateForMonth(rateMonth);
+        let amountMYR=amount; if(currency==='SGD') amountMYR=amount*rate;
+        const finalDate=transactionDateInput.value||todayStr();
+        if(editingTransactionId){
+          const t=data.transactions.find(x=>x.id===editingTransactionId);
+          if(t){ t.name=name; t.amountMYR=amountMYR; t.type=type; t.status=status; t.date=finalDate; t.originalCurrency=currency; t.originalAmount=amount; }
+        }else{
+          data.transactions.push({id:nextTransactionId,bankId:currentBankId,name,amountMYR,type,status,date:finalDate,originalCurrency:currency,originalAmount:amount});
+          nextTransactionId++;
+        }
+        saveData(); editingTransactionId=null; currentBankId=null; closeTransactionForm(); showToast('已保存'); render();
+      };
+    }
+
+    function initInstallEvents(){
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt',function(e){
+        e.preventDefault(); deferredPrompt=e; installBtn.style.display='flex';
+      });
+      installBtn.addEventListener('click',async function(){
+        menuOverlay.classList.remove('show');
+        if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; }
+        else showToast('请查看浏览器安装选项');
+      });
+    }
+
+    function initEventListeners(){
+      initRateAndMonthFilterEvents();
+      initMenuEvents();
+      initMonthEvents();
+      initNotesEvents();
+      initFormEvents();
+      initInstallEvents();
+    }
     loadData(); currentMonthFilter=todayStr().slice(0,7); initEventListeners(); render();
   })();
 </script>
