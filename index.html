@@ -54,20 +54,20 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 18px 22px;
-      border-radius: 28px;
+      padding: 12px 16px;
+      border-radius: 20px;
       background: linear-gradient(180deg, #e0e0e0 0%, #c8c8c8 100%);
       box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.12), -4px -4px 12px rgba(255, 255, 255, 0.7);
     }
-    .title-left { display: flex; align-items: center; gap: 14px; }
-    .app-icon { font-size: 1.6rem; }
-    .app-title { font-weight: 700; font-size: 1.3rem; color: #3a3a3a; }
-    .title-actions { display: flex; align-items: center; gap: 12px; }
+    .title-left { display: flex; align-items: center; gap: 10px; }
+    .app-icon { font-size: 1.3rem; }
+    .app-title { font-weight: 700; font-size: 1.05rem; color: #3a3a3a; }
+    .title-actions { display: flex; align-items: center; gap: 8px; }
     .header-btn {
-      width: 36px; height: 36px; border: none; border-radius: 50%; cursor: pointer;
+      width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer;
       background: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%);
       box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.6);
-      display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #3a3a3a;
+      display: flex; align-items: center; justify-content: center; font-size: 0.95rem; color: #3a3a3a;
     }
     .header-btn:active { transform: scale(0.94); box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.15), inset -2px -2px 4px rgba(255, 255, 255, 0.5); }
     .btn {
@@ -79,10 +79,10 @@
     .btn:active { transform: scale(0.96); box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.5); }
     .btn.confirm-danger { color: #c0392b; font-weight: 700; }
     .btn.confirm-safe { color: #2c7a4a; font-weight: 700; }
-    .summary-section { display: flex; flex-direction: column; gap: 10px; }
-    .summary-row { display: flex; gap: 10px; }
+    .summary-section { display: flex; flex-direction: column; gap: 8px; }
+    .summary-row { display: flex; gap: 8px; }
     .summary-card {
-      flex: 1; padding: 14px 12px; border-radius: 22px;
+      flex: 1; padding: 10px 12px; border-radius: 18px;
       background: linear-gradient(180deg, #e0e0e0 0%, #c8c8c8 100%);
       box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.1), -3px -3px 10px rgba(255, 255, 255, 0.6);
     }
@@ -90,27 +90,32 @@
     .expense-card { background: linear-gradient(180deg, #fce8e8 0%, #f0d0d0 100%); }
     .pending-income-card { background: linear-gradient(180deg, #fff0d8 0%, #f5e0c0 100%); }
     .pending-expense-card { background: linear-gradient(180deg, #f5e0dc 0%, #e8ccc8 100%); }
-    .net-card { background: linear-gradient(180deg, #e8e8f0 0%, #d0d0e0 100%); }
-    .summary-label { font-size: 0.65rem; font-weight: 700; opacity: 0.7; display: flex; align-items: center; gap: 5px; }
+    .net-card { background: linear-gradient(180deg, #e8e8f0 0%, #d0d0e0 100%); padding: 10px 14px; }
+    .summary-label { font-size: 0.62rem; font-weight: 700; opacity: 0.7; display: flex; align-items: center; gap: 5px; }
     .summary-dot { width: 8px; height: 8px; border-radius: 50%; }
     .summary-dot.green { background: #4caf50; }
     .summary-dot.orange { background: #ff9800; }
     .summary-dot.red { background: #e07b7b; }
     .summary-dot.deeppurple { background: #7e57c2; }
     .summary-dot.blue { background: #5c6bc0; }
-    .summary-amount { font-size: 1rem; font-weight: 800; color: #2c3e50; }
+    .summary-amount { font-size: 0.92rem; font-weight: 800; color: #2c3e50; margin-top: 2px; }
     .summary-count { font-size: 0.55rem; font-weight: 600; opacity: 0.5; }
-    .net-card .summary-amount { font-size: 1.2rem; }
+    .net-card .summary-amount { font-size: 1.05rem; }
     .rate-box {
-      display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-radius: 22px;
+      display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-radius: 18px;
       background: linear-gradient(180deg, #e0e0e0 0%, #c8c8c8 100%);
       box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.08), inset -3px -3px 6px rgba(255, 255, 255, 0.5);
       font-size: 0.85rem; font-weight: 600; color: #5b4b39;
     }
-    .rate-box input {
-      width: 85px; background: #e2e2e2; border: none; border-radius: 18px; padding: 8px 12px;
+    .rate-box input,
+    .rate-box select {
+      width: 85px; background: #e2e2e2; border: none; border-radius: 16px; padding: 8px 12px;
       font-weight: 700; text-align: center; box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.08), inset -2px -2px 5px rgba(255, 255, 255, 0.6);
-      font-size: 16px;
+      font-size: 16px; margin: 0;
+    }
+    .month-filter-box select {
+      width: auto; flex: 1; text-align: left; padding: 8px 26px 8px 14px; font-weight: 600; margin-left: 10px;
+      background-position: right 10px center;
     }
     .bank-status-stats {
       display: flex;
