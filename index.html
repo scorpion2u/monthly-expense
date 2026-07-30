@@ -546,12 +546,12 @@
       (data.months||[]).forEach(m=>months.add(m));
       months.add(todayStr().slice(0,7));
       const sorted=[...months].sort().reverse();
-      monthFilterOptionsData=[{value:'all',label:'全部记录'}].concat(sorted.map(m=>{
+      monthFilterOptionsData=sorted.map(m=>{
         const [y,mo]=m.split('-'); return {value:m,label:y+'年'+mo+'月'};
-      }));
-      if(!(sorted.includes(currentMonthFilter)||currentMonthFilter==='all')) currentMonthFilter='all';
+      });
+      if(!sorted.includes(currentMonthFilter)) currentMonthFilter=todayStr().slice(0,7);
       const current=monthFilterOptionsData.find(o=>o.value===currentMonthFilter);
-      monthFilterLabel.textContent=current?current.label:'全部记录';
+      monthFilterLabel.textContent=current?current.label:formatMonthLabel(currentMonthFilter);
     }
     function renderMonthFilterList(){
       monthFilterList.innerHTML=monthFilterOptionsData.map(o=>
@@ -661,7 +661,7 @@
         if(data.months) data.months=data.months.filter(m=>m!==month);
         if(data.rates) delete data.rates[month];
         bankIds.forEach(id=>delete expandedBanks[id]);
-        currentMonthFilter='all';
+        currentMonthFilter=todayStr().slice(0,7);
         saveData();
         showToast(formatMonthLabel(month)+'已删除');
         render();
