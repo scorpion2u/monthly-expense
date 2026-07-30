@@ -697,7 +697,7 @@
           expandedBanks[newBankId]=true; bankCount++;
           data.transactions.filter(t=>t.bankId===b.id).forEach(t=>{
             const amountMYR=t.originalCurrency==='SGD'?t.originalAmount*targetRate:t.amountMYR;
-            data.transactions.push({id:nextTransactionId++,bankId:newBankId,name:t.name,amountMYR,type:t.type,status:t.status,date:targetDate,originalCurrency:t.originalCurrency,originalAmount:t.originalAmount});
+            data.transactions.push({id:nextTransactionId++,bankId:newBankId,name:t.name,amountMYR,type:t.type,status:'unpaid',date:targetDate,originalCurrency:t.originalCurrency,originalAmount:t.originalAmount});
             txCount++;
           });
         });
