@@ -17,8 +17,8 @@
   <link rel="apple-touch-icon" href="https://scorpion2u.github.io/monthly-expense/icon-192.png">
   <style>
     :root {
-      --card-grad: var(--card-grad);
-      --btn-grad: var(--btn-grad);
+      --card-grad: linear-gradient(180deg, #e0e0e0 0%, #c8c8c8 100%);
+      --btn-grad: linear-gradient(180deg, #e6e6e6 0%, #cccccc 100%);
       --radius-outer: 24px;
       --radius-card: 18px;
       --radius-pill: 14px;
@@ -140,6 +140,12 @@
     .month-filter-item.active { background: linear-gradient(180deg, #d4ecd8 0%, #b7dcbe 100%); color: #1b5e20; }
     .month-filter-item .check { opacity: 0; font-weight: 800; }
     .month-filter-item.active .check { opacity: 1; }
+    .year-nav { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 6px 0 16px; }
+    .year-nav button { width: 36px; height: 36px; border: none; border-radius: 50%; background: var(--btn-grad); font-size: 1.2rem; font-weight: 700; color: #3a3a3a; cursor: pointer; }
+    .year-nav span { font-size: 1.15rem; font-weight: 800; min-width: 64px; text-align: center; color: #3a3a3a; }
+    .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+    .month-cell { padding: 12px 0; border: none; border-radius: var(--radius-pill); background: var(--btn-grad); font-weight: 700; font-size: 0.85rem; color: #3a3a3a; cursor: pointer; text-align: center; }
+    .month-cell.active { background: linear-gradient(180deg, #d4ecd8 0%, #b7dcbe 100%); color: #1b5e20; }
     .bank-status-stats {
       display: flex;
       flex-wrap: wrap;
@@ -270,18 +276,19 @@
   <div class="form-overlay" id="transactionFormOverlay"><div class="form-panel"><div class="modal-title" id="transactionFormTitle">新增记录</div><input id="transactionNameInput" placeholder="名称（必填）"><input id="transactionAmountInput" type="number" placeholder="金额（必填）" step="0.01" min="0"><select id="transactionCurrency"><option value="MYR">MYR 马币</option><option value="SGD">SGD 新币</option></select><select id="transactionType"><option value="income">收入</option><option value="expense" selected>支付</option></select><select id="transactionStatus"><option value="unpaid">未支付</option><option value="paid">已支付</option></select><input type="date" id="transactionDateInput"><div class="row-buttons"><button id="transactionSaveBtn" class="btn">保存</button><button id="transactionCancelBtn" class="btn">取消</button></div></div></div>
   <div class="form-overlay" id="exportNotesOverlay"><div class="form-panel" style="max-width: 420px;"><div class="modal-title">📝 导出笔记</div><div class="export-preview" id="notesPreview"></div><div class="row-buttons"><button class="btn confirm-safe" id="copyNotesBtn">📋 复制笔记</button><button class="btn" id="downloadNotesBtn">💾 下载笔记</button><button class="btn" id="closeNotesBtn">关闭</button></div></div></div>
   <div class="modal-overlay" id="clearConfirmOverlay"><div class="modal-box"><div class="modal-title">⚠️ 危险操作</div><div class="modal-message">清空后将删除所有分类和记录，且无法恢复！</div><div class="danger-input"><input type="text" id="clearConfirmInput" placeholder='输入"确认清空"以继续'></div><div class="danger-warning">⚠️ 此操作不可撤销</div><div class="modal-buttons"><button class="btn cancel-btn" id="clearConfirmCancel">取消</button><button class="btn confirm-danger" id="clearConfirmOk" disabled>确认清空</button></div></div></div>
-  <div class="form-overlay" id="copyMonthOverlay"><div class="form-panel"><div class="modal-title">📋 复制分类和记录到其他月份</div><div style="font-size:0.8rem;color:#7a6a55;margin:-6px 0 4px;">从（源月份）</div><select id="copySourceMonth"></select><div style="font-size:0.8rem;color:#7a6a55;margin:8px 0 4px;">复制到（目标月份，日期将统一设为该月1日）</div><input type="month" id="copyTargetMonth"><div class="row-buttons"><button id="copyMonthConfirmBtn" class="btn confirm-safe">确认复制</button><button id="copyMonthCancelBtn" class="btn">取消</button></div></div></div>
-  <div class="form-overlay" id="addMonthOverlay"><div class="form-panel"><div class="modal-title">🗓️ 新增月份</div><input type="month" id="addMonthInput"><div class="row-buttons"><button id="addMonthConfirmBtn" class="btn confirm-safe">创建</button><button id="addMonthCancelBtn" class="btn">取消</button></div></div></div>
+  <div class="form-overlay" id="copyMonthOverlay"><div class="form-panel"><div class="modal-title">📋 复制分类和记录到其他月份</div><div style="font-size:0.8rem;color:#7a6a55;margin:-6px 0 4px;">从（源月份）</div><button type="button" class="month-select-btn" id="copySourceMonthBtn" style="width:100%;margin-left:0;" aria-haspopup="true" aria-label="选择源月份"><span id="copySourceMonthLabel">选择月份</span><span class="month-select-arrow" aria-hidden="true">▾</span></button><div style="font-size:0.8rem;color:#7a6a55;margin:8px 0 4px;">复制到（目标月份，日期将统一设为该月1日）</div><button type="button" class="month-select-btn" id="copyTargetMonthBtn" style="width:100%;margin-left:0;" aria-haspopup="true" aria-label="选择目标月份"><span id="copyTargetMonthLabel">选择月份</span><span class="month-select-arrow" aria-hidden="true">▾</span></button><div class="row-buttons"><button id="copyMonthConfirmBtn" class="btn confirm-safe">确认复制</button><button id="copyMonthCancelBtn" class="btn">取消</button></div></div></div>
   <div class="form-overlay" id="monthFilterOverlay"><div class="form-panel month-filter-popup"><div class="modal-title">📅 选择月份</div><div class="month-filter-list" id="monthFilterList" role="listbox" aria-label="月份列表"></div><button id="monthFilterCloseBtn" class="btn" style="margin-top:12px;width:100%;">关闭</button></div></div>
+  <div class="form-overlay" id="monthYearPickerOverlay"><div class="form-panel month-year-picker"><div class="modal-title">🗓️ 设置月份</div><div class="year-nav"><button type="button" id="myYearPrev" aria-label="上一年">‹</button><span id="myYearLabel">2026</span><button type="button" id="myYearNext" aria-label="下一年">›</button></div><div class="month-grid" id="myMonthGrid"></div><div class="row-buttons"><button id="myConfirmBtn" class="btn confirm-safe">设置</button><button id="myCancelBtn" class="btn">取消</button></div></div></div>
   <div class="modal-overlay" id="modalOverlay"><div class="modal-box"><div class="modal-title" id="modalIcon">⚠️</div><div class="modal-message" id="modalMessage"></div><div class="modal-buttons"><button class="btn cancel-btn" id="modalCancel">取消</button><button class="btn confirm-btn" id="modalConfirm">确认</button></div></div></div>
   <div class="toast" id="toast"></div>
 </div>
 <script>
   (function(){
     const STORAGE_KEY='ledger_fusion_v17', RATE_KEY='ledger_exchange_rate';
-    let DEFAULT_RATE=3.0975, data={banks:[], transactions:[], rates:{}, months:[]}, nextBankId=1, nextTransactionId=1, expandedBanks={}, editingTransactionId=null, editingBankId=null, currentBankId=null, currentMonthFilter='all';
-    const listEl=document.getElementById('list'), toastEl=document.getElementById('toast'), rateInput=document.getElementById('exchangeRateInput'), rateMonthLabel=document.getElementById('rateMonthLabel'), monthFilterBtn=document.getElementById('monthFilterBtn'), monthFilterLabel=document.getElementById('monthFilterLabel'), monthFilterOverlay=document.getElementById('monthFilterOverlay'), monthFilterList=document.getElementById('monthFilterList'), monthFilterCloseBtn=document.getElementById('monthFilterCloseBtn'), copyMonthBtn=document.getElementById('copyMonthBtn'), copyMonthOverlay=document.getElementById('copyMonthOverlay'), copySourceMonth=document.getElementById('copySourceMonth'), copyTargetMonth=document.getElementById('copyTargetMonth'), copyMonthConfirmBtn=document.getElementById('copyMonthConfirmBtn'), copyMonthCancelBtn=document.getElementById('copyMonthCancelBtn'), addMonthBtn=document.getElementById('addMonthBtn'), deleteMonthBtn=document.getElementById('deleteMonthBtn'), addMonthOverlay=document.getElementById('addMonthOverlay'), addMonthInput=document.getElementById('addMonthInput'), addMonthConfirmBtn=document.getElementById('addMonthConfirmBtn'), addMonthCancelBtn=document.getElementById('addMonthCancelBtn');
-    let monthFilterOptionsData=[];
+    let DEFAULT_RATE=3.0975, data={banks:[], transactions:[], rates:{}, months:[]}, nextBankId=1, nextTransactionId=1, expandedBanks={}, editingTransactionId=null, editingBankId=null, currentBankId=null, currentMonthFilter=null;
+    const listEl=document.getElementById('list'), toastEl=document.getElementById('toast'), rateInput=document.getElementById('exchangeRateInput'), rateMonthLabel=document.getElementById('rateMonthLabel'), monthFilterBtn=document.getElementById('monthFilterBtn'), monthFilterLabel=document.getElementById('monthFilterLabel'), monthFilterOverlay=document.getElementById('monthFilterOverlay'), monthFilterList=document.getElementById('monthFilterList'), monthFilterCloseBtn=document.getElementById('monthFilterCloseBtn'), copyMonthBtn=document.getElementById('copyMonthBtn'), copyMonthOverlay=document.getElementById('copyMonthOverlay'), copySourceMonthBtn=document.getElementById('copySourceMonthBtn'), copySourceMonthLabel=document.getElementById('copySourceMonthLabel'), copyTargetMonthBtn=document.getElementById('copyTargetMonthBtn'), copyTargetMonthLabel=document.getElementById('copyTargetMonthLabel'), copyMonthConfirmBtn=document.getElementById('copyMonthConfirmBtn'), copyMonthCancelBtn=document.getElementById('copyMonthCancelBtn'), addMonthBtn=document.getElementById('addMonthBtn'), deleteMonthBtn=document.getElementById('deleteMonthBtn'), monthYearPickerOverlay=document.getElementById('monthYearPickerOverlay'), myYearPrev=document.getElementById('myYearPrev'), myYearNext=document.getElementById('myYearNext'), myYearLabel=document.getElementById('myYearLabel'), myMonthGrid=document.getElementById('myMonthGrid'), myConfirmBtn=document.getElementById('myConfirmBtn'), myCancelBtn=document.getElementById('myCancelBtn');
+    let monthFilterOptionsData=[], copySourceMonthOptionsData=[], copySourceMonthValue=null, copyTargetMonthValue=null;
+    let monthYearPickerYear=null, monthYearPickerMonth=null, monthYearPickerOnSelect=null;
     const totalIncomeEl=document.getElementById('totalIncome'), totalIncomeCountEl=document.getElementById('totalIncomeCount'), totalExpenseEl=document.getElementById('totalExpense'), totalExpenseCountEl=document.getElementById('totalExpenseCount'), pendingIncomeEl=document.getElementById('pendingIncome'), pendingIncomeCountEl=document.getElementById('pendingIncomeCount'), pendingExpenseEl=document.getElementById('pendingExpense'), pendingExpenseCountEl=document.getElementById('pendingExpenseCount'), netBalanceEl=document.getElementById('netBalanceDisplay');
     const bankFormOverlay=document.getElementById('bankFormOverlay'), bankNameInput=document.getElementById('bankNameInput'), bankSaveBtn=document.getElementById('bankSaveBtn'), bankCancelBtn=document.getElementById('bankCancelBtn'), bankFormTitle=document.getElementById('bankFormTitle');
     const transactionFormOverlay=document.getElementById('transactionFormOverlay'), transactionFormTitle=document.getElementById('transactionFormTitle'), transactionNameInput=document.getElementById('transactionNameInput'), transactionAmountInput=document.getElementById('transactionAmountInput'), transactionCurrency=document.getElementById('transactionCurrency'), transactionType=document.getElementById('transactionType'), transactionStatusEl=document.getElementById('transactionStatus'), transactionDateInput=document.getElementById('transactionDateInput'), transactionSaveBtn=document.getElementById('transactionSaveBtn'), transactionCancelBtn=document.getElementById('transactionCancelBtn');
@@ -532,10 +539,10 @@
     function monthRange(month){ const [y,m]=month.split('-').map(Number); const lastDay=new Date(y,m,0).getDate(); return {min:month+'-01', max:month+'-'+String(lastDay).padStart(2,'0')}; }
     function setDateRangeForBank(bank){ const month=bank?bank.month:getWorkingMonth(); const r=monthRange(month); transactionDateInput.min=r.min; transactionDateInput.max=r.max; return r; }
     function formatMonthLabel(month){ const [y,m]=month.split('-'); return y+'年'+m+'月'; }
-    function getWorkingMonth(){ return currentMonthFilter!=='all' ? currentMonthFilter : todayStr().slice(0,7); }
+    function getWorkingMonth(){ return currentMonthFilter || todayStr().slice(0,7); }
     function getRateForMonth(month){ return (data.rates&&data.rates[month]!==undefined) ? data.rates[month] : DEFAULT_RATE; }
     function setRateForMonth(month,rate){ if(!data.rates) data.rates={}; data.rates[month]=rate; }
-    function getVisibleBanks(){ return currentMonthFilter==='all' ? data.banks : data.banks.filter(b=>b.month===currentMonthFilter); }
+    function getVisibleBanks(){ return data.banks.filter(b=>b.month===currentMonthFilter); }
     function normalizeData(d){ if(!d.banks)d.banks=[]; if(!d.transactions)d.transactions=[]; if(!d.rates)d.rates={}; if(!d.months)d.months=[]; d.transactions.forEach(t=>{ if(!t.type)t.type='expense'; if(!t.status)t.status='unpaid'; if(!t.originalCurrency){ t.originalCurrency='MYR'; t.originalAmount=t.amountMYR; } if(t.originalAmount===undefined)t.originalAmount=t.amountMYR; }); d.banks.forEach(b=>{ if(!b.month){ const bankDates=d.transactions.filter(t=>t.bankId===b.id).map(t=>t.date).filter(Boolean).sort(); b.month=bankDates.length?bankDates[0].slice(0,7):todayStr().slice(0,7); } if(!d.months.includes(b.month)) d.months.push(b.month); }); return d; }
     function loadData(){ const legacyRate=parseFloat(localStorage.getItem(RATE_KEY)); if(!isNaN(legacyRate)&&legacyRate>0) DEFAULT_RATE=legacyRate; const saved=localStorage.getItem(STORAGE_KEY); if(saved){ try{ data=JSON.parse(saved); data=normalizeData(data); }catch(e){ data={banks:[],transactions:[],rates:{},months:[]}; } }else data={banks:[],transactions:[],rates:{},months:[]}; nextBankId=data.banks.reduce((max,b)=>Math.max(max,b.id),0)+1; nextTransactionId=data.transactions.reduce((max,t)=>Math.max(max,t.id),0)+1; expandedBanks={}; }
     function saveData(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(data)); }
@@ -553,18 +560,34 @@
       const current=monthFilterOptionsData.find(o=>o.value===currentMonthFilter);
       monthFilterLabel.textContent=current?current.label:formatMonthLabel(currentMonthFilter);
     }
-    function renderMonthFilterList(){
-      monthFilterList.innerHTML=monthFilterOptionsData.map(o=>
-        `<button type="button" class="month-filter-item ${o.value===currentMonthFilter?'active':''}" data-month-value="${o.value}" role="option" aria-selected="${o.value===currentMonthFilter}">${o.label}<span class="check">✓</span></button>`
+    function openMonthPicker(options, currentValue, onSelect){
+      monthFilterList.innerHTML=options.map(o=>
+        `<button type="button" class="month-filter-item ${o.value===currentValue?'active':''}" data-month-value="${o.value}" role="option" aria-selected="${o.value===currentValue}">${o.label}<span class="check">✓</span></button>`
       ).join('');
       monthFilterList.querySelectorAll('.month-filter-item').forEach(btn=>{
-        btn.onclick=()=>{ currentMonthFilter=btn.dataset.monthValue; monthFilterOverlay.classList.remove('show'); render(); };
+        btn.onclick=()=>{ monthFilterOverlay.classList.remove('show'); onSelect(btn.dataset.monthValue); };
       });
+      monthFilterOverlay.classList.add('show');
+    }
+    function renderMonthYearPicker(){
+      myYearLabel.textContent=monthYearPickerYear;
+      myMonthGrid.innerHTML=Array.from({length:12},(_,i)=>i+1).map(mo=>
+        `<button type="button" class="month-cell ${mo===monthYearPickerMonth?'active':''}" data-month="${mo}">${mo}月</button>`
+      ).join('');
+      myMonthGrid.querySelectorAll('.month-cell').forEach(btn=>{
+        btn.onclick=()=>{ monthYearPickerMonth=parseInt(btn.dataset.month,10); renderMonthYearPicker(); };
+      });
+    }
+    function openMonthYearPicker(initialValue, onSelect){
+      const [y,m]=(initialValue||todayStr().slice(0,7)).split('-').map(Number);
+      monthYearPickerYear=y; monthYearPickerMonth=m; monthYearPickerOnSelect=onSelect;
+      renderMonthYearPicker();
+      monthYearPickerOverlay.classList.add('show');
     }
     function getBankTransactions(bankId){ return data.transactions.filter(t=>t.bankId===bankId); }
     function getTotals(){ let totalInc=0,totalExp=0,pendingInc=0,pendingExp=0,paidIncC=0,unpaidIncC=0,paidExpC=0,unpaidExpC=0; const visibleBankIds=new Set(getVisibleBanks().map(b=>b.id)); data.transactions.filter(t=>visibleBankIds.has(t.bankId)).forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income'){ totalInc+=amt; if(t.status==='unpaid'){ pendingInc+=amt; unpaidIncC++; }else paidIncC++; }else{ totalExp+=amt; if(t.status==='unpaid'){ pendingExp+=amt; unpaidExpC++; }else paidExpC++; } }); const net=(totalInc-pendingInc)-(totalExp-pendingExp); return {totalInc,totalExp,pendingInc,pendingExp,incC:unpaidIncC+paidIncC,expC:unpaidExpC+paidExpC,pendingIncC:unpaidIncC,pendingExpC:unpaidExpC,net}; }
     function updateSummary(){ const t=getTotals(); totalIncomeEl.textContent='RM '+t.totalInc.toFixed(2); totalIncomeCountEl.textContent=t.incC+' 笔'; totalExpenseEl.textContent='RM '+t.totalExp.toFixed(2); totalExpenseCountEl.textContent=t.expC+' 笔'; pendingIncomeEl.textContent='RM '+t.pendingInc.toFixed(2); pendingIncomeCountEl.textContent=t.pendingIncC+' 笔'; pendingExpenseEl.textContent='RM '+t.pendingExp.toFixed(2); pendingExpenseCountEl.textContent=t.pendingExpC+' 笔'; netBalanceEl.textContent='RM '+t.net.toFixed(2); netBalanceEl.style.color=t.net>=0?'#2f6b44':'#c25a3a'; }
-    function generateNotes(){ const workMonth=getWorkingMonth(); const rateNote=currentMonthFilter==='all'?'（各月汇率可能不同，此处仅供参考）':''; let notes='📒 帐目记录 · 记账笔记\n📅 生成时间：'+new Date().toLocaleDateString('zh-CN')+'\n💱 汇率：1 SGD = '+getRateForMonth(workMonth)+' MYR'+rateNote+'\n────────────────────────\n\n'; const visibleBanks=getVisibleBanks(); if(visibleBanks.length===0) notes+='暂无分类和记录。\n'; else visibleBanks.forEach(bank=>{ const transactions=getBankTransactions(bank.id); if(transactions.length===0) return; notes+=`【${bank.name}】\n`; [...transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).forEach(t=>{ const prefix=t.type==='income'?'➕ 收入':'➖ 支付'; const currencyInfo=t.originalCurrency==='SGD'?` (SGD ${t.originalAmount.toFixed(2)})`:''; notes+=`  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo}\n`; }); notes+='\n'; }); notes+='────────────────────────\n📱 帐目记录 · 记账工具'; return notes; }
+    function generateNotes(){ const workMonth=getWorkingMonth(); let notes='📒 帐目记录 · 记账笔记\n📅 生成时间：'+new Date().toLocaleDateString('zh-CN')+'\n💱 汇率：1 SGD = '+getRateForMonth(workMonth)+' MYR'+'\n────────────────────────\n\n'; const visibleBanks=getVisibleBanks(); if(visibleBanks.length===0) notes+='暂无分类和记录。\n'; else visibleBanks.forEach(bank=>{ const transactions=getBankTransactions(bank.id); if(transactions.length===0) return; notes+=`【${bank.name}】\n`; [...transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).forEach(t=>{ const prefix=t.type==='income'?'➕ 收入':'➖ 支付'; const currencyInfo=t.originalCurrency==='SGD'?` (SGD ${t.originalAmount.toFixed(2)})`:''; notes+=`  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo}\n`; }); notes+='\n'; }); notes+='────────────────────────\n📱 帐目记录 · 记账工具'; return notes; }
     function render(){
       populateMonthFilterOptions();
       const workMonth=getWorkingMonth();
@@ -654,11 +677,10 @@
     function performAddMonth(month){
       if(!month){ showToast('请选择月份'); return; }
       if(!data.months) data.months=[];
-      if(data.months.includes(month) || data.banks.some(b=>b.month===month)){ showToast(formatMonthLabel(month)+' 已存在'); currentMonthFilter=month; addMonthOverlay.classList.remove('show'); render(); return; }
+      if(data.months.includes(month) || data.banks.some(b=>b.month===month)){ showToast(formatMonthLabel(month)+' 已存在'); currentMonthFilter=month; render(); return; }
       data.months.push(month);
       saveData();
       currentMonthFilter=month;
-      addMonthOverlay.classList.remove('show');
       showToast('已新增'+formatMonthLabel(month));
       render();
     }
@@ -711,7 +733,7 @@
       } else doCopy();
     }
     function initRateAndMonthFilterEvents(){
-      monthFilterBtn.onclick=()=>{ renderMonthFilterList(); monthFilterOverlay.classList.add('show'); };
+      monthFilterBtn.onclick=()=>{ openMonthPicker(monthFilterOptionsData, currentMonthFilter, val=>{ currentMonthFilter=val; render(); }); };
       monthFilterCloseBtn.onclick=()=>monthFilterOverlay.classList.remove('show');
       monthFilterOverlay.addEventListener('click',e=>{ if(e.target===monthFilterOverlay) monthFilterOverlay.classList.remove('show'); });
       bindActivate(rateEditIcon, ()=>{ rateInput.focus(); rateInput.select(); });
@@ -783,27 +805,51 @@
       copyMonthBtn.onclick=()=>{
         const months=[...new Set(data.banks.map(b=>b.month))].filter(Boolean).sort().reverse();
         if(!months.length){ showToast('还没有可复制的分类'); return; }
-        copySourceMonth.innerHTML=months.map(m=>`<option value="${m}">${formatMonthLabel(m)}</option>`).join('');
+        copySourceMonthOptionsData=months.map(m=>({value:m,label:formatMonthLabel(m)}));
         const defaultSource=months.includes(currentMonthFilter)?currentMonthFilter:months[0];
-        copySourceMonth.value=defaultSource;
+        copySourceMonthValue=defaultSource;
+        copySourceMonthLabel.textContent=formatMonthLabel(defaultSource);
         const [sy,sm]=defaultSource.split('-').map(Number);
         const nd=new Date(sy,sm,1);
-        copyTargetMonth.value=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
+        copyTargetMonthValue=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
+        copyTargetMonthLabel.textContent=formatMonthLabel(copyTargetMonthValue);
         copyMonthOverlay.classList.add('show');
+      };
+      copySourceMonthBtn.onclick=()=>{
+        openMonthPicker(copySourceMonthOptionsData, copySourceMonthValue, val=>{
+          copySourceMonthValue=val;
+          copySourceMonthLabel.textContent=formatMonthLabel(val);
+          copyMonthOverlay.classList.add('show');
+        });
+      };
+      copyTargetMonthBtn.onclick=()=>{
+        openMonthYearPicker(copyTargetMonthValue, val=>{
+          copyTargetMonthValue=val;
+          copyTargetMonthLabel.textContent=formatMonthLabel(val);
+          copyMonthOverlay.classList.add('show');
+        });
       };
       copyMonthCancelBtn.onclick=()=>copyMonthOverlay.classList.remove('show');
       copyMonthOverlay.addEventListener('click',e=>{ if(e.target===copyMonthOverlay) copyMonthOverlay.classList.remove('show'); });
-      copyMonthConfirmBtn.onclick=()=>performCopyMonth(copySourceMonth.value,copyTargetMonth.value);
+      copyMonthConfirmBtn.onclick=()=>performCopyMonth(copySourceMonthValue,copyTargetMonthValue);
+
 
       addMonthBtn.onclick=()=>{
         const [y,m]=todayStr().slice(0,7).split('-').map(Number);
         const nd=new Date(y,m,1);
-        addMonthInput.value=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
-        addMonthOverlay.classList.add('show');
+        const defaultVal=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
+        openMonthYearPicker(defaultVal, val=>performAddMonth(val));
       };
-      addMonthCancelBtn.onclick=()=>addMonthOverlay.classList.remove('show');
-      addMonthOverlay.addEventListener('click',e=>{ if(e.target===addMonthOverlay) addMonthOverlay.classList.remove('show'); });
-      addMonthConfirmBtn.onclick=()=>performAddMonth(addMonthInput.value);
+
+      myYearPrev.onclick=()=>{ monthYearPickerYear--; renderMonthYearPicker(); };
+      myYearNext.onclick=()=>{ monthYearPickerYear++; renderMonthYearPicker(); };
+      myCancelBtn.onclick=()=>monthYearPickerOverlay.classList.remove('show');
+      monthYearPickerOverlay.addEventListener('click',e=>{ if(e.target===monthYearPickerOverlay) monthYearPickerOverlay.classList.remove('show'); });
+      myConfirmBtn.onclick=()=>{
+        const val=monthYearPickerYear+'-'+String(monthYearPickerMonth).padStart(2,'0');
+        monthYearPickerOverlay.classList.remove('show');
+        if(monthYearPickerOnSelect) monthYearPickerOnSelect(val);
+      };
 
       deleteMonthBtn.onclick=()=>performDeleteMonth(currentMonthFilter);
     }
