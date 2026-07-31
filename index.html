@@ -549,7 +549,7 @@
     }
     
     function showToast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1800); }
-    function showModal(message,options={}){ return new Promise(resolve=>{ modalResolve=resolve; modalMessage.textContent=message; document.getElementById('modalIcon').textContent=options.icon||'⚠️'; modalConfirm.className='btn confirm-btn'+(options.confirmClass?' '+options.confirmClass:' confirm-danger'); modalConfirm.textContent=options.confirmText||'确认'; modalCancel.textContent=options.cancelText||'取消'; modalCancel.style.display=options.showCancel===false?'none':''; modalOverlay.classList.add('show'); }); }
+    function showModal(message,options={}){ return new Promise(resolve=>{ modalResolve=resolve; modalMessage.textContent=message; document.getElementById('modalIcon').textContent=options.icon||'⚠️'; modalConfirm.className='btn confirm-btn'+(options.confirmClass?' '+options.confirmClass:' confirm-danger'); modalConfirm.textContent=options.confirmText||'确认'; modalCancel.textContent=options.cancelText||'取消'; modalCancel.style.display=options.showCancel===false?'none':''; modalOverlay.classList.add('show'); setTimeout(()=>{ (options.showCancel===false?modalConfirm:modalCancel).focus(); },150); }); }
     function hideModal(result){ modalOverlay.classList.remove('show'); if(modalResolve){ modalResolve(result); modalResolve=null; } }
     modalConfirm.onclick=()=>hideModal(true); modalCancel.onclick=()=>hideModal(false); modalOverlay.addEventListener('click',e=>{ if(e.target===modalOverlay) hideModal(false); });
     function todayStr(){ const now=new Date(); return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'); }
@@ -587,7 +587,7 @@
         };
       });
     }
-    function openDatePicker(month){ renderDatePicker(month); datePickerOverlay.classList.add('show'); }
+    function openDatePicker(month){ renderDatePicker(month); datePickerOverlay.classList.add('show'); setTimeout(()=>{ const active=datePickerDays.querySelector('.date-cell.active')||datePickerDays.querySelector('.date-cell:not(.empty)'); if(active) active.focus(); },150); }
     function formatMonthLabel(month){ const [y,m]=month.split('-'); return y+'年'+m+'月'; }
     function getWorkingMonth(){ return currentMonthFilter || todayStr().slice(0,7); }
     function getRateForMonth(month){ return (data.rates&&data.rates[month]!==undefined) ? data.rates[month] : DEFAULT_RATE; }
@@ -618,6 +618,7 @@
         btn.onclick=()=>{ monthFilterOverlay.classList.remove('show'); onSelect(btn.dataset.monthValue); };
       });
       monthFilterOverlay.classList.add('show');
+      setTimeout(()=>{ const active=monthFilterList.querySelector('.month-filter-item.active')||monthFilterList.querySelector('.month-filter-item'); if(active) active.focus(); },150);
     }
     function renderMonthYearPicker(){
       myYearLabel.textContent=monthYearPickerYear;
@@ -633,54 +634,57 @@
       monthYearPickerYear=y; monthYearPickerMonth=m; monthYearPickerOnSelect=onSelect;
       renderMonthYearPicker();
       monthYearPickerOverlay.classList.add('show');
+      setTimeout(()=>{ const active=myMonthGrid.querySelector('.month-cell.active'); if(active) active.focus(); },150);
     }
     function getBankTransactions(bankId){ return data.transactions.filter(t=>t.bankId===bankId); }
     function getTotals(){ let totalInc=0,totalExp=0,pendingInc=0,pendingExp=0,paidIncC=0,unpaidIncC=0,paidExpC=0,unpaidExpC=0; const visibleBankIds=new Set(getVisibleBanks().map(b=>b.id)); data.transactions.filter(t=>visibleBankIds.has(t.bankId)).forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income'){ totalInc+=amt; if(t.status==='unpaid'){ pendingInc+=amt; unpaidIncC++; }else paidIncC++; }else{ totalExp+=amt; if(t.status==='unpaid'){ pendingExp+=amt; unpaidExpC++; }else paidExpC++; } }); const net=(totalInc-pendingInc)-(totalExp-pendingExp); return {totalInc,totalExp,pendingInc,pendingExp,incC:unpaidIncC+paidIncC,expC:unpaidExpC+paidExpC,pendingIncC:unpaidIncC,pendingExpC:unpaidExpC,net}; }
     function updateSummary(){ const t=getTotals(); totalIncomeEl.textContent='RM '+t.totalInc.toFixed(2); totalIncomeCountEl.textContent=t.incC+' 笔'; totalExpenseEl.textContent='RM '+t.totalExp.toFixed(2); totalExpenseCountEl.textContent=t.expC+' 笔'; pendingIncomeEl.textContent='RM '+t.pendingInc.toFixed(2); pendingIncomeCountEl.textContent=t.pendingIncC+' 笔'; pendingExpenseEl.textContent='RM '+t.pendingExp.toFixed(2); pendingExpenseCountEl.textContent=t.pendingExpC+' 笔'; netBalanceEl.textContent='RM '+t.net.toFixed(2); netBalanceEl.style.color=t.net>=0?'#2f6b44':'#c25a3a'; }
     function generateNotes(){ const workMonth=getWorkingMonth(); let notes='📒 帐目记录 · 记账笔记\n📅 生成时间：'+new Date().toLocaleDateString('zh-CN')+'\n💱 汇率：1 SGD = '+getRateForMonth(workMonth)+' MYR'+'\n────────────────────────\n\n'; const visibleBanks=getVisibleBanks(); if(visibleBanks.length===0) notes+='暂无分类和记录。\n'; else visibleBanks.forEach(bank=>{ const transactions=getBankTransactions(bank.id); if(transactions.length===0) return; notes+=`【${bank.name}】\n`; [...transactions].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).forEach(t=>{ const prefix=t.type==='income'?'➕ 收入':'➖ 支付'; const currencyInfo=t.originalCurrency==='SGD'?` (SGD ${t.originalAmount.toFixed(2)})`:''; notes+=`  ${t.date} ${prefix}：${t.name}  RM ${parseFloat(t.amountMYR).toFixed(2)}${currencyInfo}\n`; }); notes+='\n'; }); notes+='────────────────────────\n📱 帐目记录 · 记账工具'; return notes; }
-    function render(){
-      populateMonthFilterOptions();
-      const workMonth=getWorkingMonth();
+    function renderRateBar(workMonth){
       rateMonthLabel.textContent='🇸🇬 '+formatMonthLabel(workMonth)+' · 1 SGD = ';
       rateInput.value=getRateForMonth(workMonth);
-      listEl.innerHTML='';
-      if(!data.banks.length){ listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无分类</div><div class="empty-state-hint">点击右上角➕添加分类</div></div>'; updateSummary(); return; }
-      const visibleBanks=getVisibleBanks();
-      if(!visibleBanks.length){ listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">'+formatMonthLabel(workMonth)+'还没有分类</div><div class="empty-state-hint">点击➕新增，或用📋从其他月份复制过来</div></div>'; updateSummary(); return; }
-      visibleBanks.forEach(bank=>{
-        const bankTransactions=getBankTransactions(bank.id);
-        let paidInc=0,unpaidInc=0,paidExp=0,unpaidExp=0,paidIncC=0,unpaidIncC=0,paidExpC=0,unpaidExpC=0;
-        bankTransactions.forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income'){ if(t.status==='paid'){ paidInc+=amt; paidIncC++; }else{ unpaidInc+=amt; unpaidIncC++; } }else{ if(t.status==='paid'){ paidExp+=amt; paidExpC++; }else{ unpaidExp+=amt; unpaidExpC++; } } });
-        let statusHtml='<div class="bank-status-stats">';
-        if(paidIncC>0) statusHtml+=`<span class="stat-item stat-paid-income">✅已收入 ${paidIncC} 笔 RM${paidInc.toFixed(2)}</span>`;
-        if(unpaidIncC>0) statusHtml+=`<span class="stat-item stat-unpaid-income">⏳待收入 ${unpaidIncC} 笔 RM${unpaidInc.toFixed(2)}</span>`;
-        if(paidExpC>0) statusHtml+=`<span class="stat-item stat-paid-expense">💰已支付 ${paidExpC} 笔 RM${paidExp.toFixed(2)}</span>`;
-        if(unpaidExpC>0) statusHtml+=`<span class="stat-item stat-unpaid-expense">⚠️待支付 ${unpaidExpC} 笔 RM${unpaidExp.toFixed(2)}</span>`;
-        if(paidIncC===0 && unpaidIncC===0 && paidExpC===0 && unpaidExpC===0) statusHtml+='<span style="font-size:0.65rem;color:#a3a3a3;">暂无记录</span>';
-        statusHtml+='</div>';
-        const isExpanded=expandedBanks[bank.id]===true;
-        const groupDiv=document.createElement('div'); groupDiv.className='bank-group'+(isExpanded?' expanded':''); groupDiv.dataset.bankId=bank.id;
-        let transactionsHtml=''; 
-        bankTransactions.forEach(t=>{ const isIncome=t.type==='income', isPaid=t.status==='paid'; const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付'); const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense'); const curTag=(t.originalCurrency==='SGD')?'<span class="currency-tag">🇸🇬 SGD</span>':''; transactionsHtml+=`<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle" aria-hidden="true">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div>${curTag}<span class="status-badge ${statusClass}">${statusLabel}</span></div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}" aria-label="${isPaid?'标记为未'+(isIncome?'收入':'支付'):'标记为已'+(isIncome?'收入':'支付')}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}" aria-label="编辑记录"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}" aria-label="删除记录"><div class="icon-del"></div></button></div></div>`; });
-        if(bankTransactions.length===0) transactionsHtml+='<div class="empty-hint">暂无记录</div>';
-        transactionsHtml+=`<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}" role="button" tabindex="0" aria-label="添加记录">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}" aria-label="删除「${escapeHtml(bank.name)}」分类">🗑 删除分类</button></div>`;
-        groupDiv.innerHTML=`<div class="bank-header"><div class="bank-header-main"><span class="bank-handle" aria-hidden="true">⋮⋮</span><span class="bank-icon">📁</span><div class="bank-header-info"><div><span class="bank-name">${escapeHtml(bank.name)}</span></div>${statusHtml}</div></div><div class="bank-header-actions"><span class="edit-bank-icon" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}" role="button" tabindex="0" aria-label="编辑「${escapeHtml(bank.name)}」分类名称">✏️</span><span class="collapse-icon" aria-hidden="true">▼</span></div></div><div class="bank-body"><div class="bank-items">${transactionsHtml}</div></div>`;
-        const headerEl=groupDiv.querySelector('.bank-header'); headerEl.onclick=e=>{ if(e.target.closest('.bank-handle')||e.target.closest('.edit-bank-icon')) return; expandedBanks[bank.id]=!expandedBanks[bank.id]; saveExpandedState(); render(); };
-        listEl.appendChild(groupDiv);
-      });
-      
-      // 状态切换按钮 - 带智能排序
-      document.querySelectorAll('.toggle-status').forEach(btn=>{ 
-        btn.onclick=e=>{ 
-          e.stopPropagation(); 
-          const tid=parseInt(btn.dataset.transactionId); 
-          const t=data.transactions.find(x=>x.id===tid); 
-          if(t){ 
+    }
+    function buildBankStatusHtml(bankTransactions){
+      let paidInc=0,unpaidInc=0,paidExp=0,unpaidExp=0,paidIncC=0,unpaidIncC=0,paidExpC=0,unpaidExpC=0;
+      bankTransactions.forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income'){ if(t.status==='paid'){ paidInc+=amt; paidIncC++; }else{ unpaidInc+=amt; unpaidIncC++; } }else{ if(t.status==='paid'){ paidExp+=amt; paidExpC++; }else{ unpaidExp+=amt; unpaidExpC++; } } });
+      let statusHtml='<div class="bank-status-stats">';
+      if(paidIncC>0) statusHtml+=`<span class="stat-item stat-paid-income">✅已收入 ${paidIncC} 笔 RM${paidInc.toFixed(2)}</span>`;
+      if(unpaidIncC>0) statusHtml+=`<span class="stat-item stat-unpaid-income">⏳待收入 ${unpaidIncC} 笔 RM${unpaidInc.toFixed(2)}</span>`;
+      if(paidExpC>0) statusHtml+=`<span class="stat-item stat-paid-expense">💰已支付 ${paidExpC} 笔 RM${paidExp.toFixed(2)}</span>`;
+      if(unpaidExpC>0) statusHtml+=`<span class="stat-item stat-unpaid-expense">⚠️待支付 ${unpaidExpC} 笔 RM${unpaidExp.toFixed(2)}</span>`;
+      if(paidIncC===0 && unpaidIncC===0 && paidExpC===0 && unpaidExpC===0) statusHtml+='<span style="font-size:0.65rem;color:#a3a3a3;">暂无记录</span>';
+      statusHtml+='</div>';
+      return statusHtml;
+    }
+    function buildTransactionRowHtml(t){
+      const isIncome=t.type==='income', isPaid=t.status==='paid';
+      const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付');
+      const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense');
+      const curTag=(t.originalCurrency==='SGD')?'<span class="currency-tag">🇸🇬 SGD</span>':'';
+      return `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle" aria-hidden="true">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div>${curTag}<span class="status-badge ${statusClass}">${statusLabel}</span></div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}" aria-label="${isPaid?'标记为未'+(isIncome?'收入':'支付'):'标记为已'+(isIncome?'收入':'支付')}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}" aria-label="编辑记录"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}" aria-label="删除记录"><div class="icon-del"></div></button></div></div>`;
+    }
+    function createBankGroupElement(bank){
+      const bankTransactions=getBankTransactions(bank.id);
+      const statusHtml=buildBankStatusHtml(bankTransactions);
+      const isExpanded=expandedBanks[bank.id]===true;
+      const groupDiv=document.createElement('div'); groupDiv.className='bank-group'+(isExpanded?' expanded':''); groupDiv.dataset.bankId=bank.id;
+      let transactionsHtml=bankTransactions.map(buildTransactionRowHtml).join('');
+      if(bankTransactions.length===0) transactionsHtml+='<div class="empty-hint">暂无记录</div>';
+      transactionsHtml+=`<div class="bank-items-footer"><div class="add-transaction-btn" data-bank-id="${bank.id}" role="button" tabindex="0" aria-label="添加记录">＋ 添加记录</div><button class="btn-delete-bank" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}" aria-label="删除「${escapeHtml(bank.name)}」分类">🗑 删除分类</button></div>`;
+      groupDiv.innerHTML=`<div class="bank-header"><div class="bank-header-main"><span class="bank-handle" aria-hidden="true">⋮⋮</span><span class="bank-icon">📁</span><div class="bank-header-info"><div><span class="bank-name">${escapeHtml(bank.name)}</span></div>${statusHtml}</div></div><div class="bank-header-actions"><span class="edit-bank-icon" data-bank-id="${bank.id}" data-bank-name="${escapeHtml(bank.name)}" role="button" tabindex="0" aria-label="编辑「${escapeHtml(bank.name)}」分类名称">✏️</span><span class="collapse-icon" aria-hidden="true">▼</span></div></div><div class="bank-body"><div class="bank-items">${transactionsHtml}</div></div>`;
+      const headerEl=groupDiv.querySelector('.bank-header'); headerEl.onclick=e=>{ if(e.target.closest('.bank-handle')||e.target.closest('.edit-bank-icon')) return; expandedBanks[bank.id]=!expandedBanks[bank.id]; saveExpandedState(); render(); };
+      return groupDiv;
+    }
+    function bindBankListEvents(){
+      document.querySelectorAll('.toggle-status').forEach(btn=>{
+        btn.onclick=e=>{
+          e.stopPropagation();
+          const tid=parseInt(btn.dataset.transactionId);
+          const t=data.transactions.find(x=>x.id===tid);
+          if(t){
             const oldStatus = t.status;
             const newStatus = oldStatus === 'paid' ? 'unpaid' : 'paid';
             t.status = newStatus;
-            
-            // 智能排序：已支付/已收入移到底部，未支付/未收入移到顶部
             if (newStatus === 'paid') {
               moveTransactionToBottom(tid, t.bankId);
               showToast('已支付，已移至底部');
@@ -688,18 +692,27 @@
               moveTransactionToTop(tid, t.bankId);
               showToast('未支付，已移至顶部');
             }
-            
-            saveData(); 
-            render(); 
-          } 
-        }; 
+            saveData();
+            render();
+          }
+        };
       });
-      
       document.querySelectorAll('.edit-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ const bank=data.banks.find(b=>b.id===t.bankId); editingTransactionId=tid; transactionNameInput.value=t.name; transactionAmountInput.value=t.originalAmount; setSegmentValue('currencySegment', t.originalCurrency||'MYR'); setSegmentValue('typeSegment', t.type||'expense'); setSegmentValue('statusSegment', t.status||'unpaid'); transactionDateValue=t.date||todayStr(); transactionDateLabel.textContent=transactionDateValue; openTransactionForm(t.bankId); } }; });
       document.querySelectorAll('.del-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.transactions=data.transactions.filter(x=>x.id!==tid); saveData(); showToast('已删除'); render(); } }); } }; });
       document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bank=data.banks.find(b=>b.id===bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; setSegmentValue('currencySegment','MYR'); setSegmentValue('typeSegment','expense'); setSegmentValue('statusSegment','unpaid'); const bankMonth=bank?bank.month:getWorkingMonth(); transactionDateValue=todayStr().startsWith(bankMonth)?todayStr():monthRange(bankMonth).min; transactionDateLabel.textContent=transactionDateValue; openTransactionForm(bankId); }); });
       document.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; const count=getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{icon:'🗑️',confirmText:'确认删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.banks=data.banks.filter(b=>b.id!==bankId); data.transactions=data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); } }); }; });
       document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }); });
+    }
+    function render(){
+      populateMonthFilterOptions();
+      const workMonth=getWorkingMonth();
+      renderRateBar(workMonth);
+      listEl.innerHTML='';
+      if(!data.banks.length){ listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">暂无分类</div><div class="empty-state-hint">点击右上角➕添加分类</div></div>'; updateSummary(); return; }
+      const visibleBanks=getVisibleBanks();
+      if(!visibleBanks.length){ listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">📂</div><div class="empty-state-text">'+formatMonthLabel(workMonth)+'还没有分类</div><div class="empty-state-hint">点击➕新增，或用📋从其他月份复制过来</div></div>'; updateSummary(); return; }
+      visibleBanks.forEach(bank=>{ listEl.appendChild(createBankGroupElement(bank)); });
+      bindBankListEvents();
       updateSummary();
       initDragAndDrop();
     }
@@ -815,7 +828,7 @@
         reader.onload=function(ev){
           try{
             let nd=JSON.parse(ev.target.result);
-            if(!nd.banks||!nd.transactions) throw new Error('格式错误');
+            if(!Array.isArray(nd.banks)||!Array.isArray(nd.transactions)) throw new Error('缺少 banks/transactions 数组字段');
             nd=normalizeData(nd);
             showModal('导入 '+nd.banks.length+' 分类 '+nd.transactions.length+' 条记录？',{icon:'📥',confirmText:'导入',confirmClass:'confirm-safe'}).then(ok=>{
               if(!ok){ importFile.value=''; return; }
@@ -824,7 +837,7 @@
               data.transactions.forEach(t=>{ if(t.id>=nextTransactionId) nextTransactionId=t.id+1; });
               saveExpandedState(); saveData(); showToast('导入成功'); importFile.value=''; render();
             });
-          }catch(err){ showToast('导入失败'); importFile.value=''; }
+          }catch(err){ console.error('导入失败：', err); showToast('导入失败：文件格式不正确'); importFile.value=''; }
         };
         reader.readAsText(f);
       };
