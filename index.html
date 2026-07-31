@@ -302,6 +302,7 @@
 <script>
   (function(){
     const STORAGE_KEY='ledger_fusion_v17', RATE_KEY='ledger_exchange_rate';
+    const CONFIG = { TOAST_DURATION: 1800, FOCUS_DELAY: 150, CONFIRM_INPUT_FOCUS_DELAY: 100 };
     let DEFAULT_RATE=3.0975, data={banks:[], transactions:[], rates:{}, months:[]}, nextBankId=1, nextTransactionId=1, expandedBanks={}, editingTransactionId=null, editingBankId=null, currentBankId=null, currentMonthFilter=null;
     const listEl=document.getElementById('list'), toastEl=document.getElementById('toast'), rateInput=document.getElementById('exchangeRateInput'), rateMonthLabel=document.getElementById('rateMonthLabel'), monthFilterBtn=document.getElementById('monthFilterBtn'), monthFilterLabel=document.getElementById('monthFilterLabel'), monthFilterOverlay=document.getElementById('monthFilterOverlay'), monthFilterList=document.getElementById('monthFilterList'), monthFilterCloseBtn=document.getElementById('monthFilterCloseBtn'), copyMonthBtn=document.getElementById('copyMonthBtn'), copyMonthOverlay=document.getElementById('copyMonthOverlay'), copySourceMonthBtn=document.getElementById('copySourceMonthBtn'), copySourceMonthLabel=document.getElementById('copySourceMonthLabel'), copyTargetMonthBtn=document.getElementById('copyTargetMonthBtn'), copyTargetMonthLabel=document.getElementById('copyTargetMonthLabel'), copyMonthConfirmBtn=document.getElementById('copyMonthConfirmBtn'), copyMonthCancelBtn=document.getElementById('copyMonthCancelBtn'), addMonthBtn=document.getElementById('addMonthBtn'), deleteMonthBtn=document.getElementById('deleteMonthBtn'), monthYearPickerOverlay=document.getElementById('monthYearPickerOverlay'), myYearPrev=document.getElementById('myYearPrev'), myYearNext=document.getElementById('myYearNext'), myYearLabel=document.getElementById('myYearLabel'), myMonthGrid=document.getElementById('myMonthGrid'), myConfirmBtn=document.getElementById('myConfirmBtn'), myCancelBtn=document.getElementById('myCancelBtn');
     let monthFilterOptionsData=[], copySourceMonthOptionsData=[], copySourceMonthValue=null, copyTargetMonthValue=null;
@@ -548,8 +549,8 @@
         document.removeEventListener('mouseup', onDragEnd);
     }
     
-    function showToast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1800); }
-    function showModal(message,options={}){ return new Promise(resolve=>{ modalResolve=resolve; modalMessage.textContent=message; document.getElementById('modalIcon').textContent=options.icon||'⚠️'; modalConfirm.className='btn confirm-btn'+(options.confirmClass?' '+options.confirmClass:' confirm-danger'); modalConfirm.textContent=options.confirmText||'确认'; modalCancel.textContent=options.cancelText||'取消'; modalCancel.style.display=options.showCancel===false?'none':''; modalOverlay.classList.add('show'); setTimeout(()=>{ (options.showCancel===false?modalConfirm:modalCancel).focus(); },150); }); }
+    function showToast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>toastEl.classList.remove('show'),CONFIG.TOAST_DURATION); }
+    function showModal(message,options={}){ return new Promise(resolve=>{ modalResolve=resolve; modalMessage.textContent=message; document.getElementById('modalIcon').textContent=options.icon||'⚠️'; modalConfirm.className='btn confirm-btn'+(options.confirmClass?' '+options.confirmClass:' confirm-danger'); modalConfirm.textContent=options.confirmText||'确认'; modalCancel.textContent=options.cancelText||'取消'; modalCancel.style.display=options.showCancel===false?'none':''; modalOverlay.classList.add('show'); setTimeout(()=>{ (options.showCancel===false?modalConfirm:modalCancel).focus(); },CONFIG.FOCUS_DELAY); }); }
     function hideModal(result){ modalOverlay.classList.remove('show'); if(modalResolve){ modalResolve(result); modalResolve=null; } }
     modalConfirm.onclick=()=>hideModal(true); modalCancel.onclick=()=>hideModal(false); modalOverlay.addEventListener('click',e=>{ if(e.target===modalOverlay) hideModal(false); });
     function todayStr(){ const now=new Date(); return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'); }
@@ -587,7 +588,7 @@
         };
       });
     }
-    function openDatePicker(month){ renderDatePicker(month); datePickerOverlay.classList.add('show'); setTimeout(()=>{ const active=datePickerDays.querySelector('.date-cell.active')||datePickerDays.querySelector('.date-cell:not(.empty)'); if(active) active.focus(); },150); }
+    function openDatePicker(month){ renderDatePicker(month); datePickerOverlay.classList.add('show'); setTimeout(()=>{ const active=datePickerDays.querySelector('.date-cell.active')||datePickerDays.querySelector('.date-cell:not(.empty)'); if(active) active.focus(); },CONFIG.FOCUS_DELAY); }
     function formatMonthLabel(month){ const [y,m]=month.split('-'); return y+'年'+m+'月'; }
     function getWorkingMonth(){ return currentMonthFilter || todayStr().slice(0,7); }
     function getRateForMonth(month){ return (data.rates&&data.rates[month]!==undefined) ? data.rates[month] : DEFAULT_RATE; }
@@ -618,7 +619,7 @@
         btn.onclick=()=>{ monthFilterOverlay.classList.remove('show'); onSelect(btn.dataset.monthValue); };
       });
       monthFilterOverlay.classList.add('show');
-      setTimeout(()=>{ const active=monthFilterList.querySelector('.month-filter-item.active')||monthFilterList.querySelector('.month-filter-item'); if(active) active.focus(); },150);
+      setTimeout(()=>{ const active=monthFilterList.querySelector('.month-filter-item.active')||monthFilterList.querySelector('.month-filter-item'); if(active) active.focus(); },CONFIG.FOCUS_DELAY);
     }
     function renderMonthYearPicker(){
       myYearLabel.textContent=monthYearPickerYear;
@@ -634,7 +635,7 @@
       monthYearPickerYear=y; monthYearPickerMonth=m; monthYearPickerOnSelect=onSelect;
       renderMonthYearPicker();
       monthYearPickerOverlay.classList.add('show');
-      setTimeout(()=>{ const active=myMonthGrid.querySelector('.month-cell.active'); if(active) active.focus(); },150);
+      setTimeout(()=>{ const active=myMonthGrid.querySelector('.month-cell.active'); if(active) active.focus(); },CONFIG.FOCUS_DELAY);
     }
     function getBankTransactions(bankId){ return data.transactions.filter(t=>t.bankId===bankId); }
     function getTotals(){ let totalInc=0,totalExp=0,pendingInc=0,pendingExp=0,paidIncC=0,unpaidIncC=0,paidExpC=0,unpaidExpC=0; const visibleBankIds=new Set(getVisibleBanks().map(b=>b.id)); data.transactions.filter(t=>visibleBankIds.has(t.bankId)).forEach(t=>{ const amt=parseFloat(t.amountMYR)||0; if(t.type==='income'){ totalInc+=amt; if(t.status==='unpaid'){ pendingInc+=amt; unpaidIncC++; }else paidIncC++; }else{ totalExp+=amt; if(t.status==='unpaid'){ pendingExp+=amt; unpaidExpC++; }else paidExpC++; } }); const net=(totalInc-pendingInc)-(totalExp-pendingExp); return {totalInc,totalExp,pendingInc,pendingExp,incC:unpaidIncC+paidIncC,expC:unpaidExpC+paidExpC,pendingIncC:unpaidIncC,pendingExpC:unpaidExpC,net}; }
@@ -701,7 +702,7 @@
       document.querySelectorAll('.del-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.transactions=data.transactions.filter(x=>x.id!==tid); saveData(); showToast('已删除'); render(); } }); } }; });
       document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bank=data.banks.find(b=>b.id===bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; setSegmentValue('currencySegment','MYR'); setSegmentValue('typeSegment','expense'); setSegmentValue('statusSegment','unpaid'); const bankMonth=bank?bank.month:getWorkingMonth(); transactionDateValue=todayStr().startsWith(bankMonth)?todayStr():monthRange(bankMonth).min; transactionDateLabel.textContent=transactionDateValue; openTransactionForm(bankId); }); });
       document.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; const count=getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{icon:'🗑️',confirmText:'确认删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.banks=data.banks.filter(b=>b.id!==bankId); data.transactions=data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); } }); }; });
-      document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }); });
+      document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),CONFIG.FOCUS_DELAY); }); });
     }
     function render(){
       populateMonthFilterOptions();
@@ -716,9 +717,9 @@
       updateSummary();
       initDragAndDrop();
     }
-    function openBankForm(){ bankFormTitle.textContent='添加分类'; editingBankId=null; bankNameInput.value=''; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }
+    function openBankForm(){ bankFormTitle.textContent='添加分类'; editingBankId=null; bankNameInput.value=''; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),CONFIG.FOCUS_DELAY); }
     function closeBankForm(){ bankFormOverlay.classList.remove('show'); editingBankId=null; }
-    function openTransactionForm(bankId){ currentBankId=bankId; transactionFormTitle.textContent=editingTransactionId?'编辑记录':'新增记录'; transactionFormOverlay.classList.add('show'); setTimeout(()=>transactionNameInput.focus(),150); }
+    function openTransactionForm(bankId){ currentBankId=bankId; transactionFormTitle.textContent=editingTransactionId?'编辑记录':'新增记录'; transactionFormOverlay.classList.add('show'); setTimeout(()=>transactionNameInput.focus(),CONFIG.FOCUS_DELAY); }
     function closeTransactionForm(){ transactionFormOverlay.classList.remove('show'); editingTransactionId=null; currentBankId=null; }
     function applyExchangeRate(){ const month=getWorkingMonth(); const oldRate=getRateForMonth(month); const val=parseFloat(rateInput.value); if(isNaN(val)||val<=0){ showToast('请输入有效汇率'); rateInput.value=oldRate; return; } if(Math.abs(val-oldRate)<0.0001) return; setRateForMonth(month,val); let recalcCount=0; const monthBankIds=new Set(data.banks.filter(b=>b.month===month).map(b=>b.id)); data.transactions.forEach(t=>{ if(t.originalCurrency==='SGD' && monthBankIds.has(t.bankId)){ const newAmt=t.originalAmount*val; if(Math.abs(t.amountMYR-newAmt)>0.001){ t.amountMYR=newAmt; recalcCount++; } } }); saveData(); render(); if(recalcCount>0) showToast(formatMonthLabel(month)+`汇率已更新，已重新换算 ${recalcCount} 条 SGD 记录`); else showToast(formatMonthLabel(month)+'汇率已保存'); }
     function setAllStatusToPaid(){
@@ -849,7 +850,7 @@
         menuOverlay.classList.remove('show');
         if(data.banks.length===0&&data.transactions.length===0){ showToast('当前没有数据可清空'); return; }
         clearConfirmInput.value=''; clearConfirmOk.disabled=true; clearConfirmOverlay.classList.add('show');
-        setTimeout(()=>clearConfirmInput.focus(),100);
+        setTimeout(()=>clearConfirmInput.focus(),CONFIG.CONFIRM_INPUT_FOCUS_DELAY);
       };
       clearConfirmCancel.onclick=()=>clearConfirmOverlay.classList.remove('show');
       clearConfirmInput.oninput=function(){ clearConfirmOk.disabled=this.value!=='确认清空'; };
