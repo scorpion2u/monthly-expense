@@ -146,6 +146,24 @@
     .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
     .month-cell { padding: 12px 0; border: none; border-radius: var(--radius-pill); background: var(--btn-grad); font-weight: 700; font-size: 0.85rem; color: #3a3a3a; cursor: pointer; text-align: center; }
     .month-cell.active { background: linear-gradient(180deg, #d4ecd8 0%, #b7dcbe 100%); color: #1b5e20; }
+    .segmented {
+      display: flex; background: #e2e2e2; border-radius: 14px; padding: 4px; margin-bottom: 10px;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.08), inset -2px -2px 4px rgba(255, 255, 255, 0.5);
+    }
+    .segment-btn { flex: 1; border: none; background: transparent; padding: 9px 0; border-radius: 10px; font-weight: 700; font-size: 0.85rem; color: #7a7a7a; cursor: pointer; font-family: inherit; }
+    .segment-btn.active { background: var(--btn-grad); color: #2c3e50; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.12); }
+    #typeSegment .segment-btn[data-val="income"].active { background: linear-gradient(180deg, #d4ecd8 0%, #b7dcbe 100%); color: #1b5e20; }
+    #typeSegment .segment-btn[data-val="expense"].active { background: linear-gradient(180deg, #f5d4d0 0%, #e8b8b2 100%); color: #8b2e20; }
+    #statusSegment .segment-btn[data-val="paid"].active { background: linear-gradient(180deg, #d4ecd8 0%, #b7dcbe 100%); color: #1b5e20; }
+    #statusSegment .segment-btn[data-val="unpaid"].active { background: linear-gradient(180deg, #ffe4c4 0%, #f0c98e 100%); color: #7a4a10; }
+    .date-picker-panel { max-width: 340px; }
+    .date-picker-month-label { text-align: center; font-weight: 800; font-size: 1rem; color: #3a3a3a; margin-bottom: 10px; }
+    .date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .date-weekdays { margin-bottom: 6px; }
+    .date-weekday { text-align: center; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); }
+    .date-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: none; border-radius: 9px; background: var(--btn-grad); font-weight: 600; font-size: 0.82rem; color: #3a3a3a; cursor: pointer; font-family: inherit; }
+    .date-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+    .date-cell.active { background: linear-gradient(180deg, #d4ecd8 0%, #b7dcbe 100%); color: #1b5e20; font-weight: 800; }
     .bank-status-stats {
       display: flex;
       flex-wrap: wrap;
@@ -273,7 +291,8 @@
   <div class="menu-overlay" id="menuOverlay"><div class="menu-popup"><button class="btn install-menu-btn" id="installAppBtn" style="display:none;">📱 安装应用</button><button class="btn" id="exportNotesBtn">📝 导出笔记</button><button class="btn" id="exportBtn">📤 导出数据</button><button class="btn" id="importBtn">📥 导入数据</button><button class="btn confirm-danger" id="clearAllBtn">⚠️ 清空所有数据</button><button class="btn" id="toggleAllStatusUnpaidBtn" style="color:#e67e22;">🔴 恢复到未收入与未支出</button><button class="btn" id="toggleAllStatusPaidBtn" style="color:#2c7a4a;">🟢 恢复到已收入与已支出</button><button class="btn" id="menuCloseBtn">关闭</button></div></div>
   <input type="file" id="importFile" accept=".json" style="display:none;">
   <div class="form-overlay" id="bankFormOverlay"><div class="form-panel"><div class="modal-title" id="bankFormTitle">添加分类</div><input id="bankNameInput" placeholder="分类名称（必填）"><div class="row-buttons"><button id="bankSaveBtn" class="btn">保存</button><button id="bankCancelBtn" class="btn">取消</button></div></div></div>
-  <div class="form-overlay" id="transactionFormOverlay"><div class="form-panel"><div class="modal-title" id="transactionFormTitle">新增记录</div><input id="transactionNameInput" placeholder="名称（必填）"><input id="transactionAmountInput" type="number" placeholder="金额（必填）" step="0.01" min="0"><select id="transactionCurrency"><option value="MYR">MYR 马币</option><option value="SGD">SGD 新币</option></select><select id="transactionType"><option value="income">收入</option><option value="expense" selected>支付</option></select><select id="transactionStatus"><option value="unpaid">未支付</option><option value="paid">已支付</option></select><input type="date" id="transactionDateInput"><div class="row-buttons"><button id="transactionSaveBtn" class="btn">保存</button><button id="transactionCancelBtn" class="btn">取消</button></div></div></div>
+  <div class="form-overlay" id="transactionFormOverlay"><div class="form-panel"><div class="modal-title" id="transactionFormTitle">新增记录</div><input id="transactionNameInput" placeholder="名称（必填）"><input id="transactionAmountInput" type="number" placeholder="金额（必填）" step="0.01" min="0"><div class="segmented" id="currencySegment" data-value="MYR"><button type="button" class="segment-btn active" data-val="MYR">MYR 马币</button><button type="button" class="segment-btn" data-val="SGD">SGD 新币</button></div><div class="segmented" id="typeSegment" data-value="expense"><button type="button" class="segment-btn" data-val="income">🟢 收入</button><button type="button" class="segment-btn active" data-val="expense">🔴 支付</button></div><div class="segmented" id="statusSegment" data-value="unpaid"><button type="button" class="segment-btn active" data-val="unpaid">未支付</button><button type="button" class="segment-btn" data-val="paid">已支付</button></div><button type="button" class="month-select-btn" id="transactionDateBtn" style="width:100%;margin-left:0;margin-bottom:10px;" aria-haspopup="true" aria-label="选择日期"><span id="transactionDateLabel">选择日期</span><span class="month-select-arrow" aria-hidden="true">📅</span></button><div class="row-buttons"><button id="transactionSaveBtn" class="btn">保存</button><button id="transactionCancelBtn" class="btn">取消</button></div></div></div>
+  <div class="form-overlay" id="datePickerOverlay"><div class="form-panel date-picker-panel"><div class="modal-title">📅 选择日期</div><div class="date-picker-month-label" id="datePickerMonthLabel"></div><div class="date-grid date-weekdays"><span class="date-weekday">日</span><span class="date-weekday">一</span><span class="date-weekday">二</span><span class="date-weekday">三</span><span class="date-weekday">四</span><span class="date-weekday">五</span><span class="date-weekday">六</span></div><div class="date-grid" id="datePickerDays"></div><button id="datePickerCloseBtn" class="btn" style="margin-top:12px;width:100%;">关闭</button></div></div>
   <div class="form-overlay" id="exportNotesOverlay"><div class="form-panel" style="max-width: 420px;"><div class="modal-title">📝 导出笔记</div><div class="export-preview" id="notesPreview"></div><div class="row-buttons"><button class="btn confirm-safe" id="copyNotesBtn">📋 复制笔记</button><button class="btn" id="downloadNotesBtn">💾 下载笔记</button><button class="btn" id="closeNotesBtn">关闭</button></div></div></div>
   <div class="modal-overlay" id="clearConfirmOverlay"><div class="modal-box"><div class="modal-title">⚠️ 危险操作</div><div class="modal-message">清空后将删除所有分类和记录，且无法恢复！</div><div class="danger-input"><input type="text" id="clearConfirmInput" placeholder='输入"确认清空"以继续'></div><div class="danger-warning">⚠️ 此操作不可撤销</div><div class="modal-buttons"><button class="btn cancel-btn" id="clearConfirmCancel">取消</button><button class="btn confirm-danger" id="clearConfirmOk" disabled>确认清空</button></div></div></div>
   <div class="form-overlay" id="copyMonthOverlay"><div class="form-panel"><div class="modal-title">📋 复制分类和记录到其他月份</div><div style="font-size:0.8rem;color:#7a6a55;margin:-6px 0 4px;">从（源月份）</div><button type="button" class="month-select-btn" id="copySourceMonthBtn" style="width:100%;margin-left:0;" aria-haspopup="true" aria-label="选择源月份"><span id="copySourceMonthLabel">选择月份</span><span class="month-select-arrow" aria-hidden="true">▾</span></button><div style="font-size:0.8rem;color:#7a6a55;margin:8px 0 4px;">复制到（目标月份，日期将统一设为该月1日）</div><button type="button" class="month-select-btn" id="copyTargetMonthBtn" style="width:100%;margin-left:0;" aria-haspopup="true" aria-label="选择目标月份"><span id="copyTargetMonthLabel">选择月份</span><span class="month-select-arrow" aria-hidden="true">▾</span></button><div class="row-buttons"><button id="copyMonthConfirmBtn" class="btn confirm-safe">确认复制</button><button id="copyMonthCancelBtn" class="btn">取消</button></div></div></div>
@@ -291,7 +310,8 @@
     let monthYearPickerYear=null, monthYearPickerMonth=null, monthYearPickerOnSelect=null;
     const totalIncomeEl=document.getElementById('totalIncome'), totalIncomeCountEl=document.getElementById('totalIncomeCount'), totalExpenseEl=document.getElementById('totalExpense'), totalExpenseCountEl=document.getElementById('totalExpenseCount'), pendingIncomeEl=document.getElementById('pendingIncome'), pendingIncomeCountEl=document.getElementById('pendingIncomeCount'), pendingExpenseEl=document.getElementById('pendingExpense'), pendingExpenseCountEl=document.getElementById('pendingExpenseCount'), netBalanceEl=document.getElementById('netBalanceDisplay');
     const bankFormOverlay=document.getElementById('bankFormOverlay'), bankNameInput=document.getElementById('bankNameInput'), bankSaveBtn=document.getElementById('bankSaveBtn'), bankCancelBtn=document.getElementById('bankCancelBtn'), bankFormTitle=document.getElementById('bankFormTitle');
-    const transactionFormOverlay=document.getElementById('transactionFormOverlay'), transactionFormTitle=document.getElementById('transactionFormTitle'), transactionNameInput=document.getElementById('transactionNameInput'), transactionAmountInput=document.getElementById('transactionAmountInput'), transactionCurrency=document.getElementById('transactionCurrency'), transactionType=document.getElementById('transactionType'), transactionStatusEl=document.getElementById('transactionStatus'), transactionDateInput=document.getElementById('transactionDateInput'), transactionSaveBtn=document.getElementById('transactionSaveBtn'), transactionCancelBtn=document.getElementById('transactionCancelBtn');
+    const transactionFormOverlay=document.getElementById('transactionFormOverlay'), transactionFormTitle=document.getElementById('transactionFormTitle'), transactionNameInput=document.getElementById('transactionNameInput'), transactionAmountInput=document.getElementById('transactionAmountInput'), transactionDateBtn=document.getElementById('transactionDateBtn'), transactionDateLabel=document.getElementById('transactionDateLabel'), transactionSaveBtn=document.getElementById('transactionSaveBtn'), transactionCancelBtn=document.getElementById('transactionCancelBtn'), datePickerOverlay=document.getElementById('datePickerOverlay'), datePickerMonthLabel=document.getElementById('datePickerMonthLabel'), datePickerDays=document.getElementById('datePickerDays'), datePickerCloseBtn=document.getElementById('datePickerCloseBtn');
+    let transactionDateValue=null;
     const modalOverlay=document.getElementById('modalOverlay'), modalMessage=document.getElementById('modalMessage'), modalConfirm=document.getElementById('modalConfirm'), modalCancel=document.getElementById('modalCancel'), clearConfirmOverlay=document.getElementById('clearConfirmOverlay'), clearConfirmInput=document.getElementById('clearConfirmInput'), clearConfirmCancel=document.getElementById('clearConfirmCancel'), clearConfirmOk=document.getElementById('clearConfirmOk'), menuOverlay=document.getElementById('menuOverlay'), menuBtn=document.getElementById('menuBtn'), menuCloseBtn=document.getElementById('menuCloseBtn'), importFile=document.getElementById('importFile'), exportNotesBtn=document.getElementById('exportNotesBtn'), exportNotesOverlay=document.getElementById('exportNotesOverlay'), notesPreview=document.getElementById('notesPreview'), copyNotesBtn=document.getElementById('copyNotesBtn'), downloadNotesBtn=document.getElementById('downloadNotesBtn'), closeNotesBtn=document.getElementById('closeNotesBtn'), installBtn=document.getElementById('installAppBtn'), rateEditIcon=document.getElementById('rateEditIcon');
     let toastTimer, modalResolve=null;
     // 让 role="button" 的 span/div 也能用 Enter / 空格键触发（用于点击后不必再切回鼠标操作）
@@ -537,7 +557,39 @@
     function todayStr(){ const now=new Date(); return now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'); }
     function escapeHtml(str){ if(!str)return ''; const d=document.createElement('div'); d.textContent=str; return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
     function monthRange(month){ const [y,m]=month.split('-').map(Number); const lastDay=new Date(y,m,0).getDate(); return {min:month+'-01', max:month+'-'+String(lastDay).padStart(2,'0')}; }
-    function setDateRangeForBank(bank){ const month=bank?bank.month:getWorkingMonth(); const r=monthRange(month); transactionDateInput.min=r.min; transactionDateInput.max=r.max; return r; }
+    function getSegmentValue(id){ return document.getElementById(id).dataset.value; }
+    function setSegmentValue(id, val){
+      const el=document.getElementById(id);
+      el.dataset.value=val;
+      el.querySelectorAll('.segment-btn').forEach(b=>b.classList.toggle('active', b.dataset.val===val));
+    }
+    function initSegment(id){
+      document.getElementById(id).querySelectorAll('.segment-btn').forEach(btn=>{
+        btn.onclick=()=>setSegmentValue(id, btn.dataset.val);
+      });
+    }
+    function renderDatePicker(month){
+      const [y,m]=month.split('-').map(Number);
+      const lastDay=new Date(y,m,0).getDate();
+      const firstWeekday=new Date(y,m-1,1).getDay();
+      const selectedDay=transactionDateValue && transactionDateValue.startsWith(month) ? parseInt(transactionDateValue.split('-')[2],10) : null;
+      datePickerMonthLabel.textContent=formatMonthLabel(month);
+      let cells='';
+      for(let i=0;i<firstWeekday;i++) cells+='<span class="date-cell empty"></span>';
+      for(let d=1;d<=lastDay;d++){
+        const dateStr=month+'-'+String(d).padStart(2,'0');
+        cells+=`<button type="button" class="date-cell ${d===selectedDay?'active':''}" data-date="${dateStr}">${d}</button>`;
+      }
+      datePickerDays.innerHTML=cells;
+      datePickerDays.querySelectorAll('.date-cell:not(.empty)').forEach(btn=>{
+        btn.onclick=()=>{
+          transactionDateValue=btn.dataset.date;
+          transactionDateLabel.textContent=transactionDateValue;
+          datePickerOverlay.classList.remove('show');
+        };
+      });
+    }
+    function openDatePicker(month){ renderDatePicker(month); datePickerOverlay.classList.add('show'); }
     function formatMonthLabel(month){ const [y,m]=month.split('-'); return y+'年'+m+'月'; }
     function getWorkingMonth(){ return currentMonthFilter || todayStr().slice(0,7); }
     function getRateForMonth(month){ return (data.rates&&data.rates[month]!==undefined) ? data.rates[month] : DEFAULT_RATE; }
@@ -645,9 +697,9 @@
         }; 
       });
       
-      document.querySelectorAll('.edit-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ const bank=data.banks.find(b=>b.id===t.bankId); editingTransactionId=tid; transactionNameInput.value=t.name; transactionAmountInput.value=t.originalAmount; transactionCurrency.value=t.originalCurrency||'MYR'; transactionType.value=t.type||'expense'; transactionStatusEl.value=t.status||'unpaid'; setDateRangeForBank(bank); transactionDateInput.value=t.date||todayStr(); openTransactionForm(t.bankId); } }; });
+      document.querySelectorAll('.edit-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ const bank=data.banks.find(b=>b.id===t.bankId); editingTransactionId=tid; transactionNameInput.value=t.name; transactionAmountInput.value=t.originalAmount; setSegmentValue('currencySegment', t.originalCurrency||'MYR'); setSegmentValue('typeSegment', t.type||'expense'); setSegmentValue('statusSegment', t.status||'unpaid'); transactionDateValue=t.date||todayStr(); transactionDateLabel.textContent=transactionDateValue; openTransactionForm(t.bankId); } }; });
       document.querySelectorAll('.del-transaction').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const tid=parseInt(btn.dataset.transactionId); const t=data.transactions.find(x=>x.id===tid); if(t){ showModal('确定删除「'+t.name+'」吗？',{icon:'🗑️',confirmText:'删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.transactions=data.transactions.filter(x=>x.id!==tid); saveData(); showToast('已删除'); render(); } }); } }; });
-      document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; transactionCurrency.value='MYR'; transactionType.value='expense'; transactionStatusEl.value='unpaid'; transactionDateInput.value=todayStr(); openTransactionForm(bankId); }); });
+      document.querySelectorAll('.add-transaction-btn').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bank=data.banks.find(b=>b.id===bankId); editingTransactionId=null; transactionNameInput.value=''; transactionAmountInput.value=''; setSegmentValue('currencySegment','MYR'); setSegmentValue('typeSegment','expense'); setSegmentValue('statusSegment','unpaid'); const bankMonth=bank?bank.month:getWorkingMonth(); transactionDateValue=todayStr().startsWith(bankMonth)?todayStr():monthRange(bankMonth).min; transactionDateLabel.textContent=transactionDateValue; openTransactionForm(bankId); }); });
       document.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; const count=getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{icon:'🗑️',confirmText:'确认删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.banks=data.banks.filter(b=>b.id!==bankId); data.transactions=data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); } }); }; });
       document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),150); }); });
       updateSummary();
@@ -879,6 +931,9 @@
     }
 
     function initFormEvents(){
+      initSegment('currencySegment'); initSegment('typeSegment'); initSegment('statusSegment');
+      datePickerCloseBtn.onclick=()=>datePickerOverlay.classList.remove('show');
+      datePickerOverlay.addEventListener('click',e=>{ if(e.target===datePickerOverlay) datePickerOverlay.classList.remove('show'); });
       bankFormOverlay.addEventListener('click',e=>{ if(e.target===bankFormOverlay) closeBankForm(); });
       bankCancelBtn.onclick=closeBankForm;
       bankSaveBtn.onclick=function(){
@@ -896,12 +951,16 @@
 
       transactionFormOverlay.addEventListener('click',e=>{ if(e.target===transactionFormOverlay) closeTransactionForm(); });
       transactionCancelBtn.onclick=closeTransactionForm;
+      transactionDateBtn.onclick=()=>{
+        const bank=data.banks.find(b=>b.id===currentBankId);
+        openDatePicker(bank?bank.month:getWorkingMonth());
+      };
       transactionSaveBtn.onclick=function(){
         const name=transactionNameInput.value.trim();
         const amountRaw=transactionAmountInput.value;
-        const currency=transactionCurrency.value;
-        const type=transactionType.value;
-        const status=transactionStatusEl.value;
+        const currency=getSegmentValue('currencySegment');
+        const type=getSegmentValue('typeSegment');
+        const status=getSegmentValue('statusSegment');
         if(!name){ showToast('请输入名称'); return; }
         let amount=parseFloat(amountRaw);
         if(isNaN(amount)||amount<0){ showToast('请输入有效金额'); return; }
@@ -909,7 +968,7 @@
         const rateMonth=targetBank?targetBank.month:getWorkingMonth();
         const rate=getRateForMonth(rateMonth);
         let amountMYR=amount; if(currency==='SGD') amountMYR=amount*rate;
-        const finalDate=transactionDateInput.value||todayStr();
+        const finalDate=transactionDateValue||todayStr();
         if(editingTransactionId){
           const t=data.transactions.find(x=>x.id===editingTransactionId);
           if(t){ t.name=name; t.amountMYR=amountMYR; t.type=type; t.status=status; t.date=finalDate; t.originalCurrency=currency; t.originalAmount=amount; }
