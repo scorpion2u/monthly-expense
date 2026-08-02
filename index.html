@@ -237,8 +237,8 @@
     .transaction-item.expense-item { border-left: 4px solid #e07b7b; }
     .bill-handle { cursor: grab; font-size: 1rem; opacity: 0.3; padding: 0 4px; flex-shrink: 0; touch-action: none; }
     .transaction-info { flex: 1; min-width: 0; }
-    .transaction-name { font-weight: 700; font-size: 0.72rem; white-space: nowrap; overflow-x: auto; display: block; max-width: 100%; scrollbar-width: none; -ms-overflow-style: none; }
-    .transaction-name::-webkit-scrollbar { display: none; }
+    .transaction-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; display: block; max-width: 100%; }
+    .transaction-name .name-text { display: inline-block; }
     .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.6rem; font-weight: 600; }
     .status-badge.paid-income { background: #c8e6c9; color: #1b5e20; }
     .status-badge.unpaid-income { background: #ffe0b2; color: #e65100; }
@@ -677,7 +677,7 @@
       const statusLabel=isIncome?(isPaid?'已收入':'待收入'):(isPaid?'已支付':'待支付');
       const statusClass=isIncome?(isPaid?'paid-income':'unpaid-income'):(isPaid?'paid-expense':'unpaid-expense');
       const curTag=(t.originalCurrency==='SGD')?'<span class="currency-tag">🇸🇬 SGD</span>':'';
-      return `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle" aria-hidden="true">⋮⋮</span><div class="transaction-info"><div class="transaction-name">${escapeHtml(t.name)}</div><div>${curTag}<span class="status-badge ${statusClass}">${statusLabel}</span></div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}" aria-label="${isPaid?'标记为未'+(isIncome?'收入':'支付'):'标记为已'+(isIncome?'收入':'支付')}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}" aria-label="编辑记录"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}" aria-label="删除记录"><div class="icon-del"></div></button></div></div>`;
+      return `<div class="transaction-item ${isIncome?'income-item':'expense-item'}" data-transaction-id="${t.id}"><span class="bill-handle" aria-hidden="true">⋮⋮</span><div class="transaction-info"><div class="transaction-name"><span class="name-text">${escapeHtml(t.name)}</span></div><div>${curTag}<span class="status-badge ${statusClass}">${statusLabel}</span></div></div><span class="transaction-amount ${isIncome?'income-amount':'expense-amount'}">${isIncome?'+':'-'}RM ${parseFloat(t.amountMYR).toFixed(2)}</span><div class="transaction-actions"><button class="icon-btn toggle-status" data-transaction-id="${t.id}" aria-label="${isPaid?'标记为未'+(isIncome?'收入':'支付'):'标记为已'+(isIncome?'收入':'支付')}"><div class="icon-dot ${isPaid?'paid':'unpaid'}"></div></button><button class="icon-btn edit-transaction" data-transaction-id="${t.id}" aria-label="编辑记录"><div class="icon-edit"></div></button><button class="icon-btn del-transaction" data-transaction-id="${t.id}" aria-label="删除记录"><div class="icon-del"></div></button></div></div>`;
     }
     function createBankGroupElement(bank){
       const bankTransactions=getBankTransactions(bank.id);
@@ -719,6 +719,28 @@
       document.querySelectorAll('.btn-delete-bank').forEach(btn=>{ btn.onclick=e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; const count=getBankTransactions(bankId).length; showModal('确定删除「'+bankName+'」及其所有 '+count+' 条记录吗？',{icon:'🗑️',confirmText:'确认删除',confirmClass:'confirm-danger'}).then(ok=>{ if(ok){ data.banks=data.banks.filter(b=>b.id!==bankId); data.transactions=data.transactions.filter(t=>t.bankId!==bankId); delete expandedBanks[bankId]; saveExpandedState(); saveData(); showToast('「'+bankName+'」已删除'); render(); } }); }; });
       document.querySelectorAll('.edit-bank-icon').forEach(btn=>{ bindActivate(btn, e=>{ e.stopPropagation(); const bankId=parseInt(btn.dataset.bankId); const bankName=btn.dataset.bankName; editingBankId=bankId; bankFormTitle.textContent='编辑分类'; bankNameInput.value=bankName; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),CONFIG.FOCUS_DELAY); }); });
     }
+    function applyAutoFitFontSize(){
+      document.querySelectorAll('.transaction-name').forEach(nameEl=>{
+        const span=nameEl.querySelector('.name-text');
+        if(!span) return;
+        span.style.fontSize='';
+        const containerWidth=nameEl.clientWidth;
+        if(containerWidth<=0) return;
+        const naturalWidth=span.scrollWidth;
+        if(naturalWidth>containerWidth){
+          const baseSize=parseFloat(getComputedStyle(span).fontSize);
+          const minSize=8;
+          let scale=(containerWidth/naturalWidth)*0.97;
+          let newSize=Math.max(baseSize*scale, minSize);
+          span.style.fontSize=newSize+'px';
+          if(span.scrollWidth>containerWidth){
+            const scale2=(containerWidth/span.scrollWidth)*0.97;
+            newSize=Math.max(newSize*scale2, minSize);
+            span.style.fontSize=newSize+'px';
+          }
+        }
+      });
+    }
     function render(){
       populateMonthFilterOptions();
       const workMonth=getWorkingMonth();
@@ -731,6 +753,7 @@
       bindBankListEvents();
       updateSummary();
       initDragAndDrop();
+      requestAnimationFrame(applyAutoFitFontSize);
     }
     function openBankForm(){ bankFormTitle.textContent='添加分类'; editingBankId=null; bankNameInput.value=''; bankFormOverlay.classList.add('show'); setTimeout(()=>bankNameInput.focus(),CONFIG.FOCUS_DELAY); }
     function closeBankForm(){ bankFormOverlay.classList.remove('show'); editingBankId=null; }
@@ -1028,6 +1051,8 @@
       initInstallEvents();
     }
     loadData(); currentMonthFilter=todayStr().slice(0,7); initEventListeners(); render();
+    let autoFitResizeTimer=null;
+    window.addEventListener('resize',()=>{ clearTimeout(autoFitResizeTimer); autoFitResizeTimer=setTimeout(applyAutoFitFontSize,200); });
   })();
 </script>
 <script>if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('./sw.js').catch(err=>console.log('SW failed',err)); }); } function isIOS(){ return /iphone|ipad|ipod/i.test(window.navigator.userAgent); } function isInStandaloneMode(){ return ('standalone' in window.navigator) && window.navigator.standalone; } window.addEventListener('load',()=>{ if(isIOS()&&!isInStandaloneMode()){ setTimeout(()=>{ const iosTip=document.createElement('div'); iosTip.innerHTML=`<div style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:90%;max-width:420px;background:#f0f0f0;color:#333;padding:16px;border-radius:20px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,0.2);font-size:14px;line-height:1.6;text-align:center;"><div style="font-size:16px;font-weight:700;margin-bottom:8px;">📱 安装到 iPhone</div><div>点击 Safari 的 <b>分享按钮</b><br>然后选择 <b>「添加到主屏幕」</b></div><button id="closeIosTip" style="margin-top:12px;border:none;background:#ddd;padding:8px 18px;border-radius:12px;cursor:pointer;">知道了</button></div>`; document.body.appendChild(iosTip); document.getElementById('closeIosTip').onclick=()=>iosTip.remove(); },1500); } });</script>
