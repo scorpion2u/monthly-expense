@@ -312,13 +312,14 @@
     <div style="font-size:0.78rem;color:#5b4b39;margin:4px 0 6px;">导出范围</div>
     <div class="segmented" id="exportRangeSegment" data-value="all">
       <button type="button" class="segment-btn active" data-val="all">全部</button>
-      <button type="button" class="segment-btn" data-val="month">当前月份</button>
+      <button type="button" class="segment-btn" data-val="month">指定月份</button>
       <button type="button" class="segment-btn" data-val="custom">自定义日期</button>
     </div>
+    <button type="button" class="month-select-btn" id="exportMonthBtn" style="display:none;width:100%;margin-left:0;margin-top:10px;" aria-haspopup="true" aria-label="选择导出月份"><span id="exportMonthLabel">当前月份</span><span class="month-select-arrow" aria-hidden="true">▾</span></button>
     <div id="exportCustomDateBox" style="display:none;gap:8px;margin:10px 0 0;">
-      <input type="date" id="exportStartDate" style="flex:1;">
+      <input type="date" id="exportStartDate" style="flex:1;width:auto;min-width:0;margin-bottom:0;">
       <span style="align-self:center;color:#7a7a7a;font-size:0.8rem;">至</span>
-      <input type="date" id="exportEndDate" style="flex:1;">
+      <input type="date" id="exportEndDate" style="flex:1;width:auto;min-width:0;margin-bottom:0;">
     </div>
     <div style="font-size:0.78rem;color:#5b4b39;margin:12px 0 6px;">导出类型</div>
     <div class="segmented" id="exportTypeSegment" data-value="all">
@@ -336,6 +337,7 @@
       <button type="button" class="segment-btn active" data-val="merge">合并</button>
       <button type="button" class="segment-btn" data-val="replace">替换</button>
     </div>
+    <div id="importReplaceWarning" style="display:none;background:#fff3cd;color:#7a5a10;padding:8px 12px;border-radius:12px;font-size:0.7rem;margin-top:8px;">⚠️ 替换模式会删除所选范围内的现有数据，且无法恢复</div>
     <div style="font-size:0.78rem;color:#5b4b39;margin:12px 0 6px;">导入月份</div>
     <button type="button" class="month-select-btn" id="importMonthBtn" style="width:100%;margin-left:0;" aria-haspopup="true" aria-label="选择导入月份"><span id="importMonthLabel">全部月份</span><span class="month-select-arrow" aria-hidden="true">▾</span></button>
     <div class="row-buttons"><button id="importConfirmBtn" class="btn confirm-safe">确认导入</button><button id="importCancelBtn" class="btn">取消</button></div>
@@ -361,8 +363,8 @@
     let transactionDateValue=null;
     const modalOverlay=document.getElementById('modalOverlay'), modalMessage=document.getElementById('modalMessage'), modalConfirm=document.getElementById('modalConfirm'), modalCancel=document.getElementById('modalCancel'), clearConfirmOverlay=document.getElementById('clearConfirmOverlay'), clearConfirmInput=document.getElementById('clearConfirmInput'), clearConfirmCancel=document.getElementById('clearConfirmCancel'), clearConfirmOk=document.getElementById('clearConfirmOk'), menuOverlay=document.getElementById('menuOverlay'), menuBtn=document.getElementById('menuBtn'), menuCloseBtn=document.getElementById('menuCloseBtn'), importFile=document.getElementById('importFile'), exportNotesBtn=document.getElementById('exportNotesBtn'), exportNotesOverlay=document.getElementById('exportNotesOverlay'), notesPreview=document.getElementById('notesPreview'), copyNotesBtn=document.getElementById('copyNotesBtn'), downloadNotesBtn=document.getElementById('downloadNotesBtn'), closeNotesBtn=document.getElementById('closeNotesBtn'), installBtn=document.getElementById('installAppBtn'), rateEditIcon=document.getElementById('rateEditIcon'), notesMonthBtn=document.getElementById('notesMonthBtn'), notesMonthLabel=document.getElementById('notesMonthLabel');
     let notesMonthValue='all';
-    const backupStatusText=document.getElementById('backupStatusText'), exportBackupOverlay=document.getElementById('exportBackupOverlay'), exportCustomDateBox=document.getElementById('exportCustomDateBox'), exportStartDate=document.getElementById('exportStartDate'), exportEndDate=document.getElementById('exportEndDate'), exportBackupConfirmBtn=document.getElementById('exportBackupConfirmBtn'), exportBackupCancelBtn=document.getElementById('exportBackupCancelBtn'), importPreviewOverlay=document.getElementById('importPreviewOverlay'), importPreviewInfo=document.getElementById('importPreviewInfo'), importMonthBtn=document.getElementById('importMonthBtn'), importMonthLabel=document.getElementById('importMonthLabel'), importConfirmBtn=document.getElementById('importConfirmBtn'), importCancelBtn=document.getElementById('importCancelBtn');
-    let toastTimer, modalResolve=null, pendingImportData=null, importMonthValue='all';
+    const backupStatusText=document.getElementById('backupStatusText'), exportBackupOverlay=document.getElementById('exportBackupOverlay'), exportCustomDateBox=document.getElementById('exportCustomDateBox'), exportStartDate=document.getElementById('exportStartDate'), exportEndDate=document.getElementById('exportEndDate'), exportBackupConfirmBtn=document.getElementById('exportBackupConfirmBtn'), exportBackupCancelBtn=document.getElementById('exportBackupCancelBtn'), exportMonthBtn=document.getElementById('exportMonthBtn'), exportMonthLabel=document.getElementById('exportMonthLabel'), importPreviewOverlay=document.getElementById('importPreviewOverlay'), importPreviewInfo=document.getElementById('importPreviewInfo'), importMonthBtn=document.getElementById('importMonthBtn'), importMonthLabel=document.getElementById('importMonthLabel'), importConfirmBtn=document.getElementById('importConfirmBtn'), importCancelBtn=document.getElementById('importCancelBtn'), importReplaceWarning=document.getElementById('importReplaceWarning');
+    let toastTimer, modalResolve=null, pendingImportData=null, importMonthValue='all', exportMonthValue=null;
     // 让 role="button" 的 span/div 也能用 Enter / 空格键触发（用于点击后不必再切回鼠标操作）
     function bindActivate(el, handler){
       el.onclick = handler;
@@ -711,7 +713,7 @@
           notes+='\n';
         });
       }
-      notes+='────────────────────────';
+      notes+='────────────────────────\n📱 帐目记录 · 记账工具';
       return notes;
     }
     function renderRateBar(workMonth){
@@ -922,32 +924,33 @@
       setSegmentValue('exportRangeSegment','all');
       setSegmentValue('exportTypeSegment','all');
       exportCustomDateBox.style.display='none';
+      exportMonthBtn.style.display='none';
+      exportMonthValue=getWorkingMonth();
+      exportMonthLabel.textContent=formatMonthLabel(exportMonthValue);
       const today=todayStr();
       exportStartDate.value=today; exportEndDate.value=today;
       exportBackupOverlay.classList.add('show');
     }
     function performExportBackup(){
       const range=getSegmentValue('exportRangeSegment'), type=getSegmentValue('exportTypeSegment');
+      // 第一步：按范围确定涉及的分类（不受类型筛选影响，保留分类本身的完整性）
       let banksInScope=data.banks.slice();
       if(range==='month'){
-        const m=getWorkingMonth();
-        banksInScope=banksInScope.filter(b=>b.month===m);
+        banksInScope=banksInScope.filter(b=>b.month===exportMonthValue);
       }
       const bankIdsInScope=new Set(banksInScope.map(b=>b.id));
       let filteredTransactions=data.transactions.filter(t=>bankIdsInScope.has(t.bankId));
       if(range==='custom'){
-        const start=exportStartDate.value, end=exportEndDate.value;
+        let start=exportStartDate.value, end=exportEndDate.value;
         if(!start||!end){ showToast('请选择日期范围'); return; }
+        if(start>end){ [start,end]=[end,start]; }
         filteredTransactions=filteredTransactions.filter(t=>t.date>=start&&t.date<=end);
         const usedBankIds=new Set(filteredTransactions.map(t=>t.bankId));
         banksInScope=banksInScope.filter(b=>usedBankIds.has(b.id));
       }
+      // 第二步：按类型筛选实际导出的记录
       if(type!=='all') filteredTransactions=filteredTransactions.filter(t=>t.type===type);
-      if(range!=='custom'){
-        const usedBankIds=new Set(filteredTransactions.map(t=>t.bankId));
-        banksInScope=banksInScope.filter(b=>usedBankIds.has(b.id)|| (type==='all'));
-      }
-      if(!filteredTransactions.length && type!=='all'){ showToast('没有符合条件的记录可导出'); return; }
+      if(!filteredTransactions.length){ showToast('没有符合条件的记录可导出'); return; }
       const monthsInScope=[...new Set(banksInScope.map(b=>b.month))];
       const ratesInScope={};
       monthsInScope.forEach(m=>{ if(data.rates && data.rates[m]!==undefined) ratesInScope[m]=data.rates[m]; });
@@ -956,7 +959,7 @@
         banks:banksInScope, transactions:filteredTransactions, rates:ratesInScope, months:monthsInScope
       };
       let fileName='帐目记录备份';
-      if(range==='month') fileName+='_'+formatMonthLabel(getWorkingMonth());
+      if(range==='month') fileName+='_'+formatMonthLabel(exportMonthValue);
       else if(range==='custom') fileName+='_'+exportStartDate.value+'_至_'+exportEndDate.value;
       else fileName+='_全部';
       if(type==='income') fileName+='_仅收入'; else if(type==='expense') fileName+='_仅支出';
@@ -994,6 +997,7 @@
             '<div><strong>总收入：</strong>RM '+totalInc.toFixed(2)+'</div>'+
             '<div><strong>总支出：</strong>RM '+totalExp.toFixed(2)+'</div>';
           setSegmentValue('importModeSegment','merge');
+          importReplaceWarning.style.display='none';
           importMonthValue='all';
           importMonthLabel.textContent='全部月份 ('+nd.transactions.length+')';
           importPreviewOverlay.classList.add('show');
@@ -1058,7 +1062,22 @@
 
       initSegment('exportRangeSegment'); initSegment('exportTypeSegment'); initSegment('importModeSegment');
       document.getElementById('exportRangeSegment').querySelectorAll('.segment-btn').forEach(btn=>{
-        btn.addEventListener('click',()=>{ exportCustomDateBox.style.display = btn.dataset.val==='custom' ? 'flex' : 'none'; });
+        btn.addEventListener('click',()=>{
+          exportCustomDateBox.style.display = btn.dataset.val==='custom' ? 'flex' : 'none';
+          exportMonthBtn.style.display = btn.dataset.val==='month' ? 'flex' : 'none';
+        });
+      });
+      exportMonthBtn.onclick=()=>{
+        const months=[...new Set(data.banks.map(b=>b.month))].sort().reverse();
+        const options=months.map(m=>({value:m,label:formatMonthLabel(m)}));
+        openMonthPicker(options, exportMonthValue, val=>{
+          exportMonthValue=val;
+          exportMonthLabel.textContent=formatMonthLabel(val);
+          exportBackupOverlay.classList.add('show');
+        });
+      };
+      document.getElementById('importModeSegment').querySelectorAll('.segment-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{ importReplaceWarning.style.display = btn.dataset.val==='replace' ? 'block' : 'none'; });
       });
 
       document.getElementById('exportBtn').onclick=showExportDialog;
